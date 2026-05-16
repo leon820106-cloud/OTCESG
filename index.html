@@ -137,6 +137,23 @@
     .mgo{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--accent);text-decoration:none;padding:5px 13px;background:#EFF6FF;border-radius:var(--r-pill);transition:.15s}
     .mgo:hover{background:#DBEAFE}
     /* MISC */
+    /* TABS BAR */
+    .tabs-bar{background:var(--surface);border-bottom:1px solid rgba(59,130,246,.12);padding:0 1.5rem}
+    .tabs-inner{display:flex;gap:0;max-width:100%}
+    .tabx{font-family:"Noto Sans TC",sans-serif;font-size:13px;padding:11px 20px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;transition:.15s}
+    .tabx:hover{color:var(--accent)}.tabx.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
+    /* SCORE PAGE */
+    .score-wrap{max-width:100%;margin:1.5rem auto 3rem;padding:0 1.5rem}
+    .score-title-row{display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1.2rem}
+    .score-section-title{font-family:"Noto Serif TC",serif;font-size:18px;font-weight:600;color:var(--text)}
+    .score-note{font-size:12px;color:var(--text3)}
+    .score-row{border-bottom:1px solid rgba(59,130,246,.07)}
+    .score-row:last-child{border-bottom:none}
+    .score-row:hover{background:#F8FAFF}
+    .score-row td{padding:10px 16px;vertical-align:middle}
+    .score-badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:var(--r-pill)}
+    .score-badge.cg{background:#DBEAFE;color:#1D4ED8}
+    .score-badge.esg{background:#FEE2E2;color:#991B1B}
     .msg{grid-column:1/-1;padding:3.5rem 2rem;text-align:center;color:var(--text3);font-size:14px}
     .tmsg{padding:3.5rem 2rem;text-align:center;color:var(--text3);font-size:14px}
     .guide-cell{line-height:1.8}
@@ -155,6 +172,7 @@
       .mgrid{grid-template-columns:1fr}
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -213,6 +231,15 @@
 <div class="err" id="err">⚠️ Google Sheets 同步失敗（試算表需設為「知道連結的人可以檢視」）。目前顯示備用資料，重新整理可再次嘗試同步。</div>
 
 <!-- ══ 搜尋 + 篩選控制列 ══ -->
+<div class="tabs-bar">
+  <div class="tabs-inner">
+    <button class="tabx active" id="tabx-guide" onclick="switchTabX('guide')">📋 評鑑題目</button>
+    <button class="tabx" id="tabx-score" onclick="switchTabX('score')">📊 歷年得分</button>
+  </div>
+</div>
+
+<!-- ══ 評鑑題目頁 ══ -->
+<div id="tabx-guide-panel">
 <div class="cb">
   <div class="ci">
     <span class="fl">面向：</span>
@@ -233,7 +260,7 @@
     <button class="fb"        id="fa-done"  onclick="sff('done')">已填答</button>
     <button class="fb"        id="fa-empty" onclick="sff('empty')">待填答</button>
     <span class="fsep"></span>
-    <div class="sx" style="min-width:140px;max-width:200px;flex:1">
+    <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
       <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="si" type="text" placeholder="搜尋指標、負責人、編號…" oninput="af()">
     </div>
@@ -242,6 +269,38 @@
 
 <!-- ══ 評鑑指南主表格 ══ -->
 <div class="tw2" id="guide-table"></div>
+
+</div><!-- end tabx-guide-panel -->
+
+<!-- ══ 歷年得分頁 ══ -->
+<div id="tabx-score-panel" style="display:none">
+  <div class="score-wrap">
+    <div class="score-title-row">
+      <div class="score-section-title">📊 歷年評鑑得分趨勢</div>
+      <div class="score-note">備註：103～114年為公司治理評鑑（第1～12屆），115年為ESG評鑑第1屆（預估）</div>
+    </div>
+    <div id="score-chart-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem 1.5rem 1rem;margin-bottom:1.5rem">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
+        <span style="width:12px;height:12px;border-radius:50%;background:#C0392B;display:inline-block;flex-shrink:0"></span>
+        <span style="font-size:15px;font-weight:600;color:#C0392B">排名前 5%</span>
+      </div>
+      <canvas id="score-chart" style="width:100%"></canvas>
+    </div>
+    <div id="score-table-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead>
+          <tr style="background:#EFF6FF;border-bottom:1px solid var(--border2)">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);width:80px">年度</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">評鑑類型</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:500;color:var(--text3);width:120px">得分</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">備註</th>
+          </tr>
+        </thead>
+        <tbody id="score-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
 <!-- ══ 填寫 Modal ══ -->
 <div class="mbg" id="ebg" onclick="ceModal(event)">
@@ -591,6 +650,141 @@
   function ceModal(e) { if (e.target === $el('ebg')) closeEdit(); }
 
   /* ── 載入 ── */
+  /* ── 頁籤切換 ── */
+  function switchTabX(tab) {
+    ['guide','score'].forEach(t => {
+      const panel = document.getElementById('tabx-'+t+'-panel');
+      const btn   = document.getElementById('tabx-'+t);
+      if (panel) panel.style.display = t===tab ? '' : 'none';
+      if (btn)   btn.classList.toggle('active', t===tab);
+    });
+    if (tab==='score') renderScorePage();
+  }
+
+  /* ── 歷年得分資料 ── */
+  const HIST_SCORES = [
+    {year:'115', score:null,   tag:'esg', label:'ESG評鑑第1屆'},
+    {year:'114', score:104.87, tag:'cg',  label:'公司治理評鑑第12屆'},
+    {year:'113', score:104.08, tag:'cg',  label:'公司治理評鑑第11屆'},
+    {year:'112', score:101.25, tag:'cg',  label:'公司治理評鑑第10屆'},
+    {year:'111', score:100.56, tag:'cg',  label:'公司治理評鑑第9屆'},
+    {year:'110', score:93.45,  tag:'cg',  label:'公司治理評鑑第8屆'},
+    {year:'109', score:90.87,  tag:'cg',  label:'公司治理評鑑第7屆'},
+    {year:'108', score:83.43,  tag:'cg',  label:'公司治理評鑑第6屆'},
+    {year:'107', score:83.40,  tag:'cg',  label:'公司治理評鑑第5屆'},
+    {year:'106', score:87.05,  tag:'cg',  label:'公司治理評鑑第4屆'},
+    {year:'105', score:77.60,  tag:'cg',  label:'公司治理評鑑第3屆'},
+    {year:'104', score:87.14,  tag:'cg',  label:'公司治理評鑑第2屆'},
+    {year:'103', score:90.27,  tag:'cg',  label:'公司治理評鑑第1屆'},
+  ];
+  let chartInstance = null;
+  function renderScorePage() {
+    const est = scoreData ? parseFloat(scoreData.total) : null;
+
+    // 表格
+    const tbody = document.getElementById('score-tbody');
+    if (tbody) {
+      tbody.innerHTML = HIST_SCORES.map(d => {
+        const isThis = d.year==='115';
+        const scoreVal = isThis ? est : d.score;
+        const scoreStr = scoreVal ? scoreVal.toFixed(2) : '同步中…';
+        const scoreColor = isThis ? 'color:#DC2626;font-weight:600' : 'color:#1D4ED8;font-weight:500';
+        return `<tr class="score-row">
+          <td style="font-weight:500">${d.year}年</td>
+          <td><span class="score-badge ${d.tag}">${d.tag==='esg'?'ESG評鑑':'公司治理評鑑'}</span></td>
+          <td style="text-align:right;font-size:15px;${scoreColor}">${scoreStr}${isThis&&scoreVal?' <span style=\'font-size:10px;color:#DC2626\'>(預估)</span>':''}</td>
+          <td style="color:var(--text3);font-size:12px">${d.label}</td>
+        </tr>`;
+      }).join('');
+    }
+
+    // 折線圖
+    const canvas = document.getElementById('score-chart');
+    if (!canvas) return;
+    const chartData = [...HIST_SCORES].reverse(); // 由舊到新
+    const labels   = chartData.map(d => d.year+'年');
+    const vals     = chartData.map(d => d.year==='115' ? est : d.score);
+    const colors   = chartData.map(d => d.year==='115' ? '#DC2626' : '#2563EB');
+    const pointR   = chartData.map(d => d.year==='115' ? 7 : 5);
+
+    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
+    // 民國年轉西元年
+    const toWestern = y => (parseInt(y) + 1911).toString();
+    const labelsW = chartData.map(d => toWestern(d.year));
+    const valsClean = chartData.map(d => d.year==='115' ? est : d.score);
+
+    // datalabels plugin（顯示每點數值）
+    const datalabelsPlugin = {
+      id: 'datalabels',
+      afterDatasetsDraw(chart) {
+        const {ctx, data, scales:{x,y}} = chart;
+        data.datasets[0].data.forEach((val, i) => {
+          if (val == null) return;
+          const xPos = x.getPixelForIndex(i);
+          const yPos = y.getPixelForValue(val);
+          ctx.save();
+          ctx.font = '600 12px Noto Sans TC, sans-serif';
+          ctx.fillStyle = '#C0392B';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(val.toFixed(2), xPos, yPos - 10);
+          ctx.restore();
+        });
+      }
+    };
+
+    chartInstance = new Chart(canvas, {
+      type: 'line',
+      plugins: [datalabelsPlugin],
+      data: {
+        labels: labelsW,
+        datasets: [{
+          label: '評鑑得分',
+          data: valsClean,
+          borderColor: '#C0392B',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#C0392B',
+          pointBorderColor: '#C0392B',
+          pointRadius: 7,
+          pointHoverRadius: 9,
+          fill: false,
+          tension: 0.3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: true,
+        aspectRatio: 2.8,
+        layout: { padding: { top: 28, right: 20 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                const d = chartData[ctx.dataIndex];
+                const v = ctx.parsed.y;
+                return v ? ` ${v.toFixed(2)} 分${d&&d.year==='115'?' (預估)':''}` : ' 同步中';
+              },
+              title: ctx => chartData[ctx[0].dataIndex]?.label || ''
+            }
+          }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(0,0,0,0.06)' },
+            ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555' }
+          },
+          y: {
+            min: 60,
+            title: { display: true, text: '成績', font: { family: 'Noto Sans TC', size: 12 }, color: '#555' },
+            grid: { color: 'rgba(0,0,0,0.06)' },
+            ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555', stepSize: 20 }
+          }
+        }
+      }
+    });
+  }
+
   async function loadData() {
     if (isLoading) return;
     isLoading=true;
