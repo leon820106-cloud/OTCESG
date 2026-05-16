@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>115年ESG評鑑管理平台｜普萊德科技</title>
+  <title>115年ESG評鑑管理平台</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet" />
@@ -154,7 +154,7 @@
   <div class="hi">
     <div class="logo">
       <div class="logo-badge">ESG</div>
-      <span class="logo-text">115年 ESG 評鑑管理平台｜普萊德科技</span>
+      <span class="logo-text">115年 ESG 評鑑管理平台</span>
     </div>
     <div class="hr">
       <span class="ss" id="ss">載入中…</span>
@@ -276,7 +276,8 @@ const FALLBACK = [{"dimension": "環境面（E）", "no": "E-1", "prevNo": "4.26
 
 const SHEET_ID = "1ItnIsyaXcd8ZfyD5TVcpbRRo9C9wG3x0dZ5emk4GSOI";
 const GID = "827224600";
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+// gviz API：公開試算表可跨域存取，不受 CORS 限制
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${GID}`;
 
 
 // CSV 解析
@@ -284,14 +285,46 @@ function sp(line){const r=[];let c='',q=false;for(let i=0;i<line.length;i++){con
 function parseCSV(t){
   const ls=t.split(/\r?\n/).filter(l=>l.trim());if(ls.length<2)return[];
   const h=sp(ls[0]).map(x=>x.trim());
+  // 自動偵測欄位：標題列比對，找不到才用 fallback 序號
   function fi(names,fb){for(const n of names){const i=h.findIndex(x=>x.toLowerCase().includes(n.toLowerCase()));if(i>=0)return i;}return fb;}
-  const ci={dim:fi(["面向","dimension"],0),no:fi(["編號","no"],1),prevNo:fi(["前屆","prevno"],2),ind:fi(["評鑑指標","指標","indicator"],3),qt:fi(["題型"],4),cr:fi(["評鑑資訊依據","依據","criteria"],4),gu:fi(["評分指南","指南","guide"],5),ex:fi(["範例","example"],7),pa:fi(["114年","答題情形","prevans"],8),ow:fi(["負責人","owner"],9),an:fi(["115年填答","115年","填答","ans115"],10),sc:fi(["預估得分","得分","score"],11)};
+  /* 欄位對應（依試算表截圖）：
+     A=面向(0) B=編號(1) C=評鑑指標(2) D=評鑑資訊依據(3)
+     E=評分指南(4) F=評分指南續(5) G=範例(6)
+     H=114年答題情形(7) I=負責人(8) J=115年填答(9) K=預估得分(10)
+     若有前屆編號欄則自動偵測 */
+  const ci={
+    dim:    fi(["面向","dimension"],0),
+    no:     fi(["編號","no"],1),
+    prevNo: fi(["前屆","prevno"],-1),
+    ind:    fi(["評鑑指標","指標","indicator"],2),
+    qt:     fi(["題型"],-1),
+    cr:     fi(["評鑑資訊依據","依據","criteria"],3),
+    gu:     fi(["評分指南","指南","guide"],4),
+    ex:     fi(["範例","example"],6),
+    pa:     fi(["114年答題","114年","答題情形"],7),
+    ow:     fi(["負責人","owner"],8),
+    an:     fi(["115年填答","填答"],9),
+    sc:     fi(["預估得分","得分","score"],10),
+  };
   const rows=[];
   for(let i=1;i<ls.length;i++){
-    const c=sp(ls[i]);const ind=(c[ci.ind]||'').trim();if(!ind)continue;
-    const pa=(c[ci.pa]||'').trim();
-    rows.push({dimension:(c[ci.dim]||'').trim(),no:(c[ci.no]||'').trim(),prevNo:(c[ci.prevNo]||'').trim(),indicator:ind,qtype:(c[ci.qt]||'').trim(),criteria:(c[ci.cr]||'').trim(),guide:(c[ci.gu]||'').trim(),example:(c[ci.ex]||'').trim(),prevAns:pa.startsWith('=')?''  :pa,owner:(c[ci.ow]||'').trim(),ans115:(c[ci.an]&&!String(c[ci.an]).startsWith('='))?(c[ci.an]||'').trim():'',score:(c[ci.sc]||'').trim()});
-  }return rows;
+    const c=sp(ls[i]);
+    const ind=(c[ci.ind]||'').trim();if(!ind)continue;
+    const g=idx=>idx>=0&&idx<c.length?(c[idx]||'').trim():'';
+    const pa=g(ci.pa); const an=g(ci.an);
+    rows.push({
+      dimension:g(ci.dim), no:g(ci.no),
+      prevNo: ci.prevNo>=0?g(ci.prevNo):'',
+      indicator:ind,
+      qtype: ci.qt>=0?g(ci.qt):'',
+      criteria:g(ci.cr), guide:g(ci.gu), example:g(ci.ex),
+      prevAns: (pa.startsWith('=')||pa==='#N/A')?'':pa,
+      owner:g(ci.ow),
+      ans115:(an.startsWith('=')||an==='#N/A')?'':an,
+      score:g(ci.sc),
+    });
+  }
+  return rows;
 }
 function esgOf(d){if(/環境|environment/i.test(d))return'E';if(/社會|social/i.test(d))return'S';if(/治理|governance/i.test(d))return'G';return(d||'?')[0].toUpperCase();}
 function psc(s){if(!s||s==='NA')return null;const c=s.replace(/\s/g,'');if(c.includes('+'))return c.split('+').reduce((a,b)=>a+(parseFloat(b)||0),0);const n=parseFloat(c);return isNaN(n)?null:n;}
