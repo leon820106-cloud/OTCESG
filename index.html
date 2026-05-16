@@ -233,6 +233,7 @@
 <div class="tabs-bar">
   <div class="tabs-inner">
     <button class="tabx active" id="tabx-guide" onclick="switchTabX('guide')">📋 評鑑題目</button>
+    <button class="tabx" id="tabx-fill" onclick="switchTabX('fill')">✍️ 填答專區</button>
     <button class="tabx" id="tabx-score" onclick="switchTabX('score')">📊 歷年評鑑</button>
   </div>
 </div>
@@ -248,16 +249,11 @@
     <button class="fb fG" data-e="G" onclick="se(this,'G')">⚖️ 治理</button>
     <span class="fsep"></span>
     <span class="fl">負責人：</span>
-    <button class="fb active" data-ow="all" onclick="sow(this,'all')">全部</button>
-    <button class="fb" data-ow="Ben" onclick="sow(this,'Ben')">Ben</button>
-    <button class="fb" data-ow="Jessie" onclick="sow(this,'Jessie')">Jessie</button>
-    <button class="fb" data-ow="Jordan" onclick="sow(this,'Jordan')">Jordan</button>
-    <button class="fb" data-ow="Leon" onclick="sow(this,'Leon')">Leon</button>
-    <span class="fsep"></span>
-    <span class="fl">填答：</span>
-    <button class="fb active" id="fa-all"   onclick="sff('all')">全部</button>
-    <button class="fb"        id="fa-done"  onclick="sff('done')">已填答</button>
-    <button class="fb"        id="fa-empty" onclick="sff('empty')">待填答</button>
+    <button class="fb active" data-ow="all" onclick="se2(this,'all')">全部</button>
+    <button class="fb" data-ow2="Ben" onclick="se2(this,'Ben')">Ben</button>
+    <button class="fb" data-ow2="Jessie" onclick="se2(this,'Jessie')">Jessie</button>
+    <button class="fb" data-ow2="Jordan" onclick="se2(this,'Jordan')">Jordan</button>
+    <button class="fb" data-ow2="Leon" onclick="se2(this,'Leon')">Leon</button>
     <span class="fsep"></span>
     <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
       <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -270,6 +266,31 @@
 <div class="tw2" id="guide-table"></div>
 
 </div><!-- end tabx-guide-panel -->
+
+<!-- ══ 填答專區 ══ -->
+<div id="tabx-fill-panel" style="display:none">
+  <div class="cb">
+    <div class="ci">
+      <span class="fl">負責人：</span>
+      <button class="fb active" data-fw="all" onclick="sfw(this,'all')">全部</button>
+      <button class="fb" data-fw="Ben" onclick="sfw(this,'Ben')">Ben</button>
+      <button class="fb" data-fw="Jessie" onclick="sfw(this,'Jessie')">Jessie</button>
+      <button class="fb" data-fw="Jordan" onclick="sfw(this,'Jordan')">Jordan</button>
+      <button class="fb" data-fw="Leon" onclick="sfw(this,'Leon')">Leon</button>
+      <span class="fsep"></span>
+      <span class="fl">填答：</span>
+      <button class="fb active" id="ffa-all"   onclick="sffa('all')">全部</button>
+      <button class="fb"        id="ffa-done"  onclick="sffa('done')">已填答</button>
+      <button class="fb"        id="ffa-empty" onclick="sffa('empty')">待填答</button>
+      <span class="fsep"></span>
+      <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="sif" type="text" placeholder="搜尋指標、負責人、編號…" oninput="afill()">
+      </div>
+    </div>
+  </div>
+  <div class="tw2" id="fill-table"></div>
+</div>
 
 <!-- ══ 歷年評鑑頁 ══ -->
 <div id="tabx-score-panel" style="display:none">
@@ -497,6 +518,7 @@
   }
   function sff(v) { ffF=v; ['all','done','empty'].forEach(k=>$el('fa-'+k)?.classList.toggle('active',k===v)); af(); }
   function sow(btn,v) { owF=v; document.querySelectorAll('.fb[data-ow]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); af(); }
+  function se2(btn,v) { owF=v; document.querySelectorAll('.fb[data-ow],[data-ow2]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); af(); }
 
   /* ══ 評鑑指南主表格 ══
      顯示欄位：面向、編號、評鑑指標、評分指南（可展開）、負責人 */
@@ -513,7 +535,6 @@
         <th style="width:42%">評分指南</th>
         <th style="width:88px">主管機關範例</th>
         <th style="width:68px">負責人</th>
-        <th style="width:96px;text-align:center">填寫</th>
       </tr></thead>
       <tbody>${rows.map((r,i)=>{
         const guide = r.guide ? r.guide.replace(/\n/g,'<br>') : '—';
@@ -527,18 +548,12 @@
           </td>
 
           <td style="text-align:center;white-space:nowrap">${r.example==='有'
-            ? `<a href="https://cgc.twse.com.tw/esgEvaluation/listCh" target="_blank" rel="noopener"
+            ? `<a href="https://cgc.twse.com.tw/static/20260130/8a828e179b9664ed019c0dfdf2a10037_115%E5%B9%B4ESG%E8%A9%95%E9%91%91_%E5%8F%83%E8%80%83%E7%AF%84%E4%BE%8B.pdf" target="_blank" rel="noopener"
                 style="font-size:12px;color:#1D4ED8;font-weight:500;text-decoration:underline">有</a>`
             : '<span style="font-size:12px;color:var(--text3)">無</span>'
           }</td>
           <td>${r.owner?`<span class="pb2">${r.owner}</span>`:'—'}</td>
-          <td style="text-align:center">
-            <button onclick="event.stopPropagation();openEdit(allRows[${i}])"
-              style="background:none;border:1px solid ${r.ans115.trim()?'rgba(22,163,74,0.35)':'rgba(59,130,246,0.3)'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:500;color:${r.ans115.trim()?'#15803D':'var(--accent)'};transition:.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px"
-              title="${r.ans115.trim()?'已填寫，點擊修改':'點擊填寫115年答題'}">
-              ${r.ans115.trim()?'✅ 已填寫':'✏️ 待填寫'}
-            </button>
-          </td>
+
         </tr>`;
       }).join('')}</tbody>
     </table>`;
@@ -558,7 +573,14 @@
     $el('eb').innerHTML = `
       <div class="mgrid">
         <div class="mrow"><div class="mlabel">面向</div><div class="mval">${r.dimension}</div></div>
+        <div class="mrow"><div class="mlabel">編號</div><div class="mval">${r.no}</div></div>
         <div class="mrow"><div class="mlabel">負責人</div><div class="mval">${r.owner ? `<span class="pb2">${r.owner}</span>` : '未指定'}</div></div>
+        <div class="mrow"><div class="mlabel">OTC範例</div><div class="mval">${r.example==='有'
+          ? `<a href="https://cgc.twse.com.tw/static/20260130/8a828e179b9664ed019c0dfdf2a10037_115%E5%B9%B4ESG%E8%A9%95%E9%91%91_%E5%8F%83%E8%80%83%E7%AF%84%E4%BE%8B.pdf"
+              target="_blank" rel="noopener"
+              style="font-size:12px;color:#1D4ED8;text-decoration:underline">📄 查看OTC參考範例</a>`
+          : '<span style="color:#94A3B8;font-size:12px">無</span>'
+        }</div></div>
       </div>
 
       <div class="mrow">
@@ -655,13 +677,14 @@
   /* ── 載入 ── */
   /* ── 頁籤切換 ── */
   function switchTabX(tab) {
-    ['guide','score'].forEach(t => {
+    ['guide','fill','score'].forEach(t => {
       const p = document.getElementById('tabx-'+t+'-panel');
       const b = document.getElementById('tabx-'+t);
       if (p) p.style.display = t===tab ? '' : 'none';
       if (b) b.classList.toggle('active', t===tab);
     });
     if (tab==='score') renderScorePage();
+    if (tab==='fill')  renderFillTable();
   }
 
   /* ── 歷年評鑑資料 ── */
@@ -732,6 +755,75 @@
     // 更新備註文字
     const note = document.getElementById('score-sync-note');
     if (note) note.textContent = '備註：103～114年為公司治理評鑑（第1～12屆），115年為ESG評鑑第1屆（預估）';
+  }
+
+  /* ── 填答專區 ── */
+  let fillOwF='all', fillFf='all';
+
+  function gfill() {
+    const q=($el('sif')?.value||'').toLowerCase();
+    let r=[...allData];
+    if (fillOwF!=='all') r=r.filter(x=>x.owner===fillOwF);
+    if (fillFf==='done')  r=r.filter(x=>x.ans115.trim());
+    if (fillFf==='empty') r=r.filter(x=>!x.ans115.trim());
+    if (q) r=r.filter(x=>x.indicator.toLowerCase().includes(q)||x.owner.toLowerCase().includes(q)||x.no.toLowerCase().includes(q));
+    return r;
+  }
+  function afill() { renderFillTable(); }
+  function sfw(btn,v) {
+    fillOwF=v;
+    document.querySelectorAll('.fb[data-fw]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderFillTable();
+  }
+  function sffa(v) {
+    fillFf=v;
+    ['all','done','empty'].forEach(k=>$el('ffa-'+k)?.classList.toggle('active',k===v));
+    renderFillTable();
+  }
+
+  function renderFillTable() {
+    const rows = gfill();
+    const el   = $el('fill-table');
+    if (!el) return;
+    if (!rows.length) { el.innerHTML='<div class="tmsg">此篩選條件下沒有資料</div>'; return; }
+
+    el.innerHTML = `<table class="dt">
+      <thead><tr>
+        <th style="width:88px">面向</th>
+        <th style="width:64px">編號</th>
+        <th style="width:22%">評鑑指標</th>
+        <th style="width:35%">評分指南</th>
+        <th style="width:64px">負責人</th>
+        <th style="width:120px;text-align:center">填寫</th>
+      </tr></thead>
+      <tbody>${rows.map((r,i)=>{
+        const guide = r.guide ? r.guide.replace(/\n/g,'<br>') : '—';
+        const f = r.ans115.trim();
+        // 已填答：直接顯示內容；未填答：顯示按鈕
+        const fillCell = f
+          ? `<div style="font-size:12px;line-height:1.7;color:var(--text2);border-left:3px solid #16A34A;padding-left:8px">${f}</div>
+             <button onclick="event.stopPropagation();openEdit(fillRows[${i}])"
+               style="margin-top:6px;background:none;border:1px solid rgba(22,163,74,0.4);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;color:#15803D;white-space:nowrap">
+               ✏️ 更正
+             </button>`
+          : `<button onclick="event.stopPropagation();openEdit(fillRows[${i}])"
+               style="background:none;border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--accent);white-space:nowrap">
+               ✏️ 待填寫
+             </button>`;
+        return `<tr>
+          <td>${etag(r.dimension)}<br><span style="font-size:10px;color:var(--text3)">${r.dimension}</span></td>
+          <td><span style="font-size:11px;font-weight:500;color:var(--text2)">${r.no}</span></td>
+          <td style="font-size:12.5px;line-height:1.8">${r.indicator.replace(/\n/g,'<br>')}</td>
+          <td style="font-size:12px;line-height:1.8">${guide}</td>
+          <td>${r.owner?`<span class="pb2">${r.owner}</span>`:'—'}</td>
+          <td style="vertical-align:top;padding-top:10px">${fillCell}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+
+    // 儲存 fillRows 給 openEdit 用
+    window.fillRows = rows;
   }
 
   /* ── SVG 折線圖 ── */
