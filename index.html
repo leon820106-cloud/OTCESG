@@ -293,6 +293,7 @@
             <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);width:80px">年度</th>
             <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">評鑑類型</th>
             <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:500;color:var(--text3);width:120px">得分</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">成果</th>
             <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">備註</th>
           </tr>
         </thead>
@@ -327,7 +328,8 @@
   const GAS_URL  = 'https://script.google.com/macros/s/AKfycbz9-0kOfG0yTGgfCrcIwj908M8sqGUZMtx6GeiBJabG2YIOEOZW_nYaTliRjwep9hOfqg/exec';
   const SHEET_ID = '1ItnIsyaXcd8ZfyD5TVcpbRRo9C9wG3x0dZ5emk4GSOI';
   const GID      = '827224600';
-  const SCORE_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=2066827436&single=true&output=csv';
+  const SCORE_CSV  = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=2066827436&single=true&output=csv';
+  const HIST_CSV   = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=1102103045&single=true&output=csv';
 
   // 發布到網路的 CSV URL（最穩定，無 CORS 問題）
   const CSV_URLS = [
@@ -658,25 +660,18 @@
       if (panel) panel.style.display = t===tab ? '' : 'none';
       if (btn)   btn.classList.toggle('active', t===tab);
     });
-    if (tab==='score') renderScorePage();
+    if (tab==='score') {
+      // 若資料還沒載入，先載再渲染
+      if (!HIST_SCORES.length) {
+        loadHistData().then(() => renderScorePage());
+      } else {
+        renderScorePage();
+      }
+    }
   }
 
   /* ── 歷年得分資料 ── */
-  const HIST_SCORES = [
-    {year:'115', score:null,   tag:'esg', label:'ESG評鑑第1屆'},
-    {year:'114', score:104.87, tag:'cg',  label:'公司治理評鑑第12屆'},
-    {year:'113', score:104.08, tag:'cg',  label:'公司治理評鑑第11屆'},
-    {year:'112', score:101.25, tag:'cg',  label:'公司治理評鑑第10屆'},
-    {year:'111', score:100.56, tag:'cg',  label:'公司治理評鑑第9屆'},
-    {year:'110', score:93.45,  tag:'cg',  label:'公司治理評鑑第8屆'},
-    {year:'109', score:90.87,  tag:'cg',  label:'公司治理評鑑第7屆'},
-    {year:'108', score:83.43,  tag:'cg',  label:'公司治理評鑑第6屆'},
-    {year:'107', score:83.40,  tag:'cg',  label:'公司治理評鑑第5屆'},
-    {year:'106', score:87.05,  tag:'cg',  label:'公司治理評鑑第4屆'},
-    {year:'105', score:77.60,  tag:'cg',  label:'公司治理評鑑第3屆'},
-    {year:'104', score:87.14,  tag:'cg',  label:'公司治理評鑑第2屆'},
-    {year:'103', score:90.27,  tag:'cg',  label:'公司治理評鑑第1屆'},
-  ];
+  let HIST_SCORES = []; // 從 Google Sheets 歷年成績工作表讀取
   let chartInstance = null;
   function renderScorePage() {
     const est = scoreData ? parseFloat(scoreData.total) : null;
@@ -687,13 +682,14 @@
       tbody.innerHTML = HIST_SCORES.map(d => {
         const isThis = d.year==='115';
         const scoreVal = isThis ? est : d.score;
-        const scoreStr = scoreVal ? scoreVal.toFixed(2) : '同步中…';
+        const scoreStr = scoreVal != null ? scoreVal.toFixed(2) : '—';
         const scoreColor = isThis ? 'color:#DC2626;font-weight:600' : 'color:#1D4ED8;font-weight:500';
         return `<tr class="score-row">
           <td style="font-weight:500">${d.year}年</td>
-          <td><span class="score-badge ${d.tag}">${d.tag==='esg'?'ESG評鑑':'公司治理評鑑'}</span></td>
+          <td><span class="score-badge ${d.tag}">${d.type||d.tag}</span></td>
           <td style="text-align:right;font-size:15px;${scoreColor}">${scoreStr}${isThis&&scoreVal?' <span style=\'font-size:10px;color:#DC2626\'>(預估)</span>':''}</td>
-          <td style="color:var(--text3);font-size:12px">${d.label}</td>
+          <td style="color:var(--text3);font-size:12px">${d.result||''}</td>
+          <td style="color:var(--text3);font-size:12px">${d.label||''}</td>
         </tr>`;
       }).join('');
     }
@@ -708,10 +704,8 @@
     const pointR   = chartData.map(d => d.year==='115' ? 7 : 5);
 
     if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-    // 民國年轉西元年
-    const toWestern = y => (parseInt(y) + 1911).toString();
-    const labelsW = chartData.map(d => toWestern(d.year));
-    const valsClean = chartData.map(d => d.year==='115' ? est : d.score);
+    const labelsW = chartData.map(d => d.year+'年');
+    const valsClean = chartData.map(d => d.year==='115' ? (est||null) : d.score);
 
     // datalabels plugin（顯示每點數值）
     const datalabelsPlugin = {
@@ -727,7 +721,8 @@
           ctx.fillStyle = '#C0392B';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'bottom';
-          ctx.fillText(val.toFixed(2), xPos, yPos - 10);
+          const label2 = chartData[i]?.year==='115' ? val.toFixed(2)+'(預估)' : val.toFixed(2);
+          ctx.fillText(label2, xPos, yPos - 10);
           ctx.restore();
         });
       }
@@ -748,7 +743,7 @@
           pointRadius: 7,
           pointHoverRadius: 9,
           fill: false,
-          tension: 0.3,
+          tension: 0,
         }]
       },
       options: {
@@ -775,14 +770,43 @@
             ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555' }
           },
           y: {
-            min: 60,
+            min: 80,
+            max: 120,
             title: { display: true, text: '成績', font: { family: 'Noto Sans TC', size: 12 }, color: '#555' },
             grid: { color: 'rgba(0,0,0,0.06)' },
-            ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555', stepSize: 20 }
+            ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555', stepSize: 10 }
           }
         }
       }
     });
+  }
+
+  async function loadHistData() {
+    try {
+      const res = await fetch(HIST_CSV + '&t=' + Date.now(), {cache:'no-store'});
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const rows = parseCSVRows(await res.text());
+      // 跳過第1列標題，A=年度 B=評鑑類型 C=得分 D=成果 E=備註
+      HIST_SCORES = [];
+      for (let i = 1; i < rows.length; i++) {
+        const c = rows[i].map(cleanCell);
+        const yr = c[0].replace('年','').trim();
+        if (!yr) continue;
+        const scoreRaw = parseFloat(c[2]);
+        const tag = /ESG/i.test(c[1]) ? 'esg' : 'cg';
+        HIST_SCORES.push({
+          year   : yr,
+          score  : isNaN(scoreRaw) ? null : scoreRaw,
+          tag    : tag,
+          type   : c[1] || '',
+          result : c[3] || '',
+          label  : c[4] || '',
+        });
+      }
+      console.log('[ESG] histData:', HIST_SCORES.length, '筆');
+    } catch(e) {
+      console.warn('[ESG] 歷年成績載入失敗：', e);
+    }
   }
 
   async function loadData() {
@@ -811,10 +835,13 @@
       setSS('同步失敗，顯示備用資料');
     }
     $el('rb').classList.remove('sp'); isLoading=false;
-    await loadScoreData();
+    await Promise.all([loadScoreData(), loadHistData()]);
     renderHSC(allData);
     renderGuide(gf());
-
+    // 若已切到歷年得分頁，同步更新圖表
+    if (document.getElementById('tabx-score-panel')?.style.display !== 'none') {
+      renderScorePage();
+    }
   }
   function refresh() { loadData(); }
 
