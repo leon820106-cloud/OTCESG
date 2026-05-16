@@ -782,30 +782,36 @@
   }
 
   async function loadHistData() {
+    // 歷史分數硬編碼（103-114年），115年從試算表讀取
+    HIST_SCORES = [
+      {year:'103', score:90.27,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第1屆公司治理評鑑'},
+      {year:'104', score:87.14,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第2屆公司治理評鑑'},
+      {year:'105', score:77.60,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司6%~20%',                                    label:'第3屆公司治理評鑑'},
+      {year:'106', score:87.05,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第4屆公司治理評鑑'},
+      {year:'107', score:83.40,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司6%~20%',                                    label:'第5屆公司治理評鑑'},
+      {year:'108', score:83.43,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司6%~20%',                                    label:'第6屆公司治理評鑑'},
+      {year:'109', score:90.87,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第7屆公司治理評鑑'},
+      {year:'110', score:93.45,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第8屆公司治理評鑑'},
+      {year:'111', score:100.56, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第9屆公司治理評鑑'},
+      {year:'112', score:101.25, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第10屆公司治理評鑑'},
+      {year:'113', score:104.08, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第11屆公司治理評鑑'},
+      {year:'114', score:104.87, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第12屆公司治理評鑑'},
+      {year:'115', score:null,   tag:'esg', type:'ESG評鑑',      result:'',                                                label:'ESG評鑑第1屆'},
+    ];
+    // 嘗試從試算表讀取115年的成果欄位
     try {
       const res = await fetch(HIST_CSV + '&t=' + Date.now(), {cache:'no-store'});
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const rows = parseCSVRows(await res.text());
-      // 跳過第1列標題，A=年度 B=評鑑類型 C=得分 D=成果 E=備註
-      HIST_SCORES = [];
       for (let i = 1; i < rows.length; i++) {
         const c = rows[i].map(cleanCell);
-        const yr = c[0].replace('年','').trim();
-        if (!yr) continue;
-        const scoreRaw = parseFloat(c[2]);
-        const tag = /ESG/i.test(c[1]) ? 'esg' : 'cg';
-        HIST_SCORES.push({
-          year   : yr,
-          score  : isNaN(scoreRaw) ? null : scoreRaw,
-          tag    : tag,
-          type   : c[1] || '',
-          result : c[3] || '',
-          label  : c[4] || '',
-        });
+        const yr = c[0].replace(/年/g,'').trim();
+        const entry = HIST_SCORES.find(h => h.year === yr);
+        if (entry && c[3]) entry.result = c[3]; // 更新成果欄
       }
-      console.log('[ESG] histData:', HIST_SCORES.length, '筆');
+      console.log('[ESG] histData 成果欄更新完成');
     } catch(e) {
-      console.warn('[ESG] 歷年成績載入失敗：', e);
+      console.warn('[ESG] 歷年成績 CSV 載入失敗，使用預設值：', e);
     }
   }
 
