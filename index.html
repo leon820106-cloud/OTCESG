@@ -62,7 +62,8 @@
     .sx{display:flex;align-items:center;gap:5px;border:1px solid rgba(59,130,246,.22);border-radius:var(--r-pill);padding:3px 9px;background:var(--surface);flex-shrink:0}
     .sx svg{width:13px;height:13px;stroke:var(--text3);fill:none;flex-shrink:0}
     .sx input{border:none;outline:none;font-family:"Noto Sans TC",sans-serif;font-size:11px;color:var(--text);background:transparent;width:100%}
-    .fl{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0}
+    .fsep{width:1px;height:18px;background:rgba(100,116,139,0.25);flex-shrink:0;margin:0 3px}
+    .fl{font-size:11px;color:var(--text3);white-space:nowrap;flex-shrink:0}
     .fb{font-family:"Noto Sans TC",sans-serif;font-size:11px;padding:3px 8px;border-radius:var(--r-pill);border:1px solid rgba(59,130,246,.22);background:transparent;color:var(--text2);cursor:pointer;transition:.15s;white-space:nowrap}
     .fb:hover{background:var(--surface2)}.fb.active{background:var(--accent);border-color:var(--accent);color:#fff}
     .fb.fE.active{background:var(--esg-e);border-color:var(--esg-e)}
@@ -219,17 +220,20 @@
     <button class="fb fE" data-e="E" onclick="se(this,'E')">🌿 環境</button>
     <button class="fb fS" data-e="S" onclick="se(this,'S')">🤝 社會</button>
     <button class="fb fG" data-e="G" onclick="se(this,'G')">⚖️ 治理</button>
-    <span class="fl ml">負責人：</span>
+    <span class="fsep"></span>
+    <span class="fl">負責人：</span>
     <button class="fb active" data-ow="all" onclick="sow(this,'all')">全部</button>
     <button class="fb" data-ow="Ben" onclick="sow(this,'Ben')">Ben</button>
     <button class="fb" data-ow="Jessie" onclick="sow(this,'Jessie')">Jessie</button>
     <button class="fb" data-ow="Jordan" onclick="sow(this,'Jordan')">Jordan</button>
     <button class="fb" data-ow="Leon" onclick="sow(this,'Leon')">Leon</button>
-    <span class="fl" style="margin-left:8px">填答：</span>
+    <span class="fsep"></span>
+    <span class="fl">填答：</span>
     <button class="fb active" id="fa-all"   onclick="sff('all')">全部</button>
     <button class="fb"        id="fa-done"  onclick="sff('done')">已填答</button>
     <button class="fb"        id="fa-empty" onclick="sff('empty')">待填答</button>
-    <div class="sx" style="margin-left:auto;min-width:120px;max-width:180px;flex:0 0 auto">
+    <span class="fsep"></span>
+    <div class="sx" style="min-width:140px;max-width:200px;flex:1">
       <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       <input id="si" type="text" placeholder="搜尋指標、負責人、編號…" oninput="af()">
     </div>
@@ -522,13 +526,9 @@
       <div id="save-hint" style="display:none;border-radius:8px;padding:.6rem 1rem;font-size:12.5px;margin-top:.3rem"></div>
 
       <div style="display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:.5rem">
-        <button onclick="closeEdit()"
-          style="font-family:'Noto Sans TC',sans-serif;font-size:13px;padding:8px 20px;background:var(--surface);color:var(--text3);border:1px solid rgba(59,130,246,.2);border-radius:var(--r-pill);cursor:pointer;transition:.15s">
-          取消
-        </button>
         <button id="save-btn" onclick="saveAns()"
           style="font-family:'Noto Sans TC',sans-serif;font-size:13px;padding:8px 24px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-pill);cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:6px">
-          💾 儲存至試算表
+          💾 ${r.ans115.trim() ? '更正並儲存' : '儲存至試算表'}
         </button>
       </div>`;
 
