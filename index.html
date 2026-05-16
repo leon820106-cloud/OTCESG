@@ -172,7 +172,6 @@
       .mgrid{grid-template-columns:1fr}
     }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
 
@@ -285,7 +284,7 @@
         <span style="width:12px;height:12px;border-radius:50%;background:#C0392B;flex-shrink:0;display:inline-block"></span>
         <span style="font-size:15px;font-weight:600;color:#C0392B">排名前 5%</span>
       </div>
-      <canvas id="score-chart"></canvas>
+      <div id="score-chart-svg"></div>
     </div>
     <!-- 明細表格 -->
     <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
@@ -666,7 +665,6 @@
   }
 
   /* ── 歷年評鑑資料 ── */
-  const HIST_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=1102103045&single=true&output=csv';
 
   // 硬編碼歷史數字（確保圖表永遠可用）
   const BASE_SCORES = [
@@ -712,111 +710,94 @@
     }
   }
 
-  /* ── 折線圖 ── */
-  let chartInst = null;
-
+  /* ── SVG 折線圖 ── */
   function renderScorePage() {
-    // 115年預估分從 scoreData
     const est115 = scoreData ? parseFloat(scoreData.total) : null;
 
-    const labels = histRows.map(d => d.y + '年');
-    const values = histRows.map(d => d.y === '115' ? est115 : d.s);
-    const ptColors = histRows.map(() => '#C0392B');
+    const PTS = [
+      {y:'103', s:90.27},  {y:'104', s:87.14},  {y:'105', s:77.60},
+      {y:'106', s:87.05},  {y:'107', s:83.40},  {y:'108', s:83.43},
+      {y:'109', s:90.87},  {y:'110', s:93.45},  {y:'111', s:100.56},
+      {y:'112', s:101.25}, {y:'113', s:104.08},  {y:'114', s:104.87},
+      {y:'115', s:est115},
+    ];
 
-    console.log('[Chart] values:', values);
+    // SVG 尺寸
+    const W=900, H=320, PL=52, PR=20, PT=40, PB=40;
+    const CW=W-PL-PR, CH=H-PT-PB;
+    const minV=70, maxV=120;
 
-    // 畫表格
+    function px(i)   { return PL + i*(CW/(PTS.length-1)); }
+    function py(val) { return PT + CH - (val-minV)/(maxV-minV)*CH; }
+
+    // Y 軸刻度 80,90,100,110,120
+    const yTicks = [80,90,100,110,120];
+    let gridLines='', yLabels='';
+    yTicks.forEach(v => {
+      const y = py(v);
+      gridLines += `<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="#e5e7eb" stroke-width="1"/>`;
+      yLabels  += `<text x="${PL-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#6b7280">${v}</text>`;
+    });
+
+    // 折線 polyline points
+    const validPts = PTS.filter(d => d.s != null);
+    const polyPts = validPts.map((d,_) => {
+      const i = PTS.indexOf(d);
+      return `${px(i).toFixed(1)},${py(d.s).toFixed(1)}`;
+    }).join(' ');
+
+    // 圓點 + 數字標籤
+    let dots='', labels='';
+    PTS.forEach((d,i) => {
+      if (d.s == null) return;
+      const cx=px(i), cy=py(d.s);
+      dots   += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="6" fill="#C0392B" stroke="#fff" stroke-width="2"/>`;
+      labels += `<text x="${cx.toFixed(1)}" y="${(cy-12).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="bold" fill="#C0392B">${d.s.toFixed(2)}</text>`;
+    });
+
+    // X 軸年度標籤
+    let xLabels='';
+    PTS.forEach((d,i) => {
+      xLabels += `<text x="${px(i).toFixed(1)}" y="${H-PB+20}" text-anchor="middle" font-size="11" fill="#6b7280">${d.y}年</text>`;
+    });
+
+    // Y 軸標題
+    const yTitle = `<text x="14" y="${(PT+CH/2).toFixed(0)}" text-anchor="middle" font-size="12" fill="#6b7280" transform="rotate(-90,14,${(PT+CH/2).toFixed(0)})">成績</text>`;
+
+    const svgHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">
+      ${gridLines}
+      <polyline points="${polyPts}" fill="none" stroke="#C0392B" stroke-width="2.5" stroke-linejoin="round"/>
+      ${dots}
+      ${labels}
+      ${xLabels}
+      ${yLabels}
+      ${yTitle}
+    </svg>`;
+
+    const wrap = document.getElementById('score-chart-svg');
+    if (wrap) wrap.innerHTML = svgHTML;
+
+    // 表格
     const tbody = document.getElementById('score-tbody');
     if (tbody) {
-      tbody.innerHTML = histRows.map(d => {
-        const v = d.y === '115' ? est115 : d.s;
-        const isEsg = d.y === '115';
-        const vs = v != null ? v.toFixed(2) : '—';
+      tbody.innerHTML = PTS.map(d => {
+        const isEsg = d.y==='115';
+        const v = d.s;
+        const vs = v!=null ? v.toFixed(2) : '—';
         const vc = isEsg ? '#DC2626' : '#1D4ED8';
         const tag = isEsg
           ? '<span class="score-badge esg">ESG評鑑</span>'
           : '<span class="score-badge cg">公司治理評鑑</span>';
+        const entry = (window._histRows||[]).find(h=>h.y===d.y)||{};
         return `<tr style="border-bottom:1px solid rgba(59,130,246,.07)">
           <td style="padding:9px 16px;font-weight:500">${d.y}年</td>
           <td style="padding:9px 16px">${tag}</td>
           <td style="padding:9px 16px;text-align:right;font-size:15px;color:${vc};font-weight:600">${vs}${isEsg&&v?' <span style="font-size:10px">(預估)</span>':''}</td>
-          <td style="padding:9px 16px;color:var(--text3);font-size:12px">${d.result}</td>
-          <td style="padding:9px 16px;color:var(--text3);font-size:12px">${d.note}</td>
+          <td style="padding:9px 16px;color:var(--text3);font-size:12px">${entry.result||''}</td>
+          <td style="padding:9px 16px;color:var(--text3);font-size:12px">${entry.note||''}</td>
         </tr>`;
       }).join('');
     }
-
-    // 畫折線圖
-    const canvas = document.getElementById('score-chart');
-    if (!canvas) return;
-    if (chartInst) { chartInst.destroy(); chartInst = null; }
-
-    chartInst = new Chart(canvas, {
-      type: 'line',
-      data: {
-        labels,
-        datasets: [{
-          data: values,
-          borderColor: '#C0392B',
-          borderWidth: 2.5,
-          pointBackgroundColor: ptColors,
-          pointBorderColor: '#fff',
-          pointBorderWidth: 2,
-          pointRadius: 6,
-          pointHoverRadius: 8,
-          fill: false,
-          tension: 0,
-          spanGaps: true,
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: true,
-        aspectRatio: 3.2,
-        layout: { padding: { top: 30, right: 20 } },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            callbacks: {
-              label: ctx => {
-                const v = ctx.parsed.y;
-                return v ? ` ${v.toFixed(2)} 分` : ' —';
-              }
-            }
-          }
-        },
-        scales: {
-          x: {
-            grid: { color: 'rgba(0,0,0,0.05)' },
-            ticks: { font: { size: 12 }, color: '#555' }
-          },
-          y: {
-            min: 70, max: 120,
-            grid: { color: 'rgba(0,0,0,0.05)' },
-            title: { display: true, text: '成績', font: { size: 12 }, color: '#555' },
-            ticks: { stepSize: 10, font: { size: 12 }, color: '#555' }
-          }
-        }
-      },
-      plugins: [{
-        id: 'ptLabels',
-        afterDatasetsDraw(chart) {
-          const {ctx, scales: {x, y}} = chart;
-          values.forEach((v, i) => {
-            if (v == null) return;
-            const px = x.getPixelForIndex(i);
-            const py = y.getPixelForValue(v);
-            ctx.save();
-            ctx.font = 'bold 11.5px "Noto Sans TC",sans-serif';
-            ctx.fillStyle = '#C0392B';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.fillText(v.toFixed(2), px, py - 10);
-            ctx.restore();
-          });
-        }
-      }]
-    });
   }
 
   async function loadData() {
