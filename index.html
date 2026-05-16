@@ -20,7 +20,7 @@
     body{font-family:"Noto Sans TC",sans-serif;background:#F0F5FF;color:var(--text);min-height:100vh}
     /* HEADER */
     header{background:linear-gradient(135deg,#EFF6FF 0%,#DBEAFE 100%);border-bottom:1.5px solid rgba(59,130,246,0.22);box-shadow:0 2px 10px rgba(37,99,235,0.07);position:sticky;top:0;z-index:100}
-    .hi{max-width:1300px;margin:0 auto;padding:0 2rem;height:52px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+    .hi{max-width:100%;margin:0 auto;padding:0 1.5rem;min-width:0;height:52px;display:flex;align-items:center;justify-content:space-between;gap:1rem}
     .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
     .logo-badge{background:var(--accent);border-radius:6px;padding:3px 9px;font-size:11px;font-weight:600;color:#fff;letter-spacing:.1em}
     .logo-text{font-size:14px;font-weight:500;color:var(--text);white-space:nowrap}
@@ -35,9 +35,9 @@
     .sb:hover{background:#BFDBFE}
     .sb svg{width:14px;height:14px;fill:none;stroke:currentColor}
     /* HERO */
-    .hero{background:linear-gradient(160deg,#EFF6FF 0%,#DBEAFE 60%,#C7D2FE 100%);border-bottom:1px solid rgba(99,102,241,0.15);padding:1.3rem 2rem 1.1rem;position:relative;overflow:hidden}
+    .hero{background:linear-gradient(160deg,#EFF6FF 0%,#DBEAFE 60%,#C7D2FE 100%);border-bottom:1px solid rgba(99,102,241,0.15);padding:1.2rem 1.5rem 1rem;position:relative;overflow:hidden}
     .hbg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
-    .hin{max-width:1300px;margin:0 auto;position:relative;z-index:1;display:flex;align-items:flex-start;justify-content:space-between;gap:2rem;flex-wrap:wrap}
+    .hin{max-width:100%;margin:0 auto;position:relative;z-index:1;display:flex;flex-direction:column;gap:1rem}
     .htb{background:rgba(255,255,255,0.82);backdrop-filter:blur(4px);border-radius:14px;padding:.9rem 1.4rem;max-width:520px}
     .hero h1{font-family:"Noto Serif TC",serif;font-size:24px;font-weight:600;color:#1E3A8A;line-height:1.4;margin-bottom:.35rem}
     .hero-sub{font-size:12px;color:#1D4ED8;line-height:1.9}
@@ -46,31 +46,31 @@
     .eb.E{background:#DCFCE7;color:#15803D;border:1px solid rgba(22,163,74,.25)}
     .eb.S{background:#FFEDD5;color:#C2410C;border:1px solid rgba(234,88,12,.25)}
     .eb.G{background:#EDE9FE;color:#6D28D9;border:1px solid rgba(124,58,237,.25)}
-    .hsc{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start}
-    .hcard{background:rgba(255,255,255,0.8);backdrop-filter:blur(4px);border-radius:12px;padding:.7rem 1.1rem;text-align:center;min-width:85px}
+    .hsc{display:flex;gap:8px;flex-wrap:wrap;align-items:stretch}
+    .hcard{background:rgba(255,255,255,0.8);backdrop-filter:blur(4px);border-radius:12px;padding:.6rem 1rem;text-align:center;flex:1;min-width:80px}
     .hn{font-size:22px;font-weight:600}
-    .hn.all{color:var(--accent)}.hn.pass{color:var(--esg-e)}.hn.ip{color:var(--warn)}.hn.sc{color:#7C3AED}
+    .hn.all{color:var(--accent)}.hn.pass{color:var(--esg-e)}.hn.ip{color:var(--warn)}.hn.sc{color:#7C3AED}.hn.fail{color:#DC2626}
     .hl{font-size:10px;color:var(--text3);margin-top:2px}
     /* TABS */
-    .tabs{background:var(--surface);border-bottom:1px solid rgba(59,130,246,.12);padding:0 2rem;position:sticky;top:52px;z-index:98}
-    .ti{max-width:1300px;margin:0 auto;display:flex;overflow-x:auto}
+    .tabs{background:var(--surface);border-bottom:1px solid rgba(59,130,246,.12);padding:0 1.5rem;position:sticky;top:52px;z-index:98}
+    .ti{max-width:100%;margin:0 auto;display:flex;overflow-x:auto}
     .tab{font-family:"Noto Sans TC",sans-serif;font-size:13px;padding:11px 17px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text3);cursor:pointer;white-space:nowrap;transition:.15s}
     .tab:hover{color:var(--accent)}.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:500}
     /* CONTROLS */
-    .cb{background:var(--surface);border-bottom:1px solid rgba(59,130,246,.1);padding:.7rem 2rem}
-    .ci{max-width:1300px;margin:0 auto;display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-    .sx{display:flex;align-items:center;gap:7px;border:1px solid rgba(59,130,246,.22);border-radius:var(--r-pill);padding:5px 13px;background:var(--surface);min-width:200px;flex:1;max-width:320px}
+    .cb{background:var(--surface);border-bottom:1px solid rgba(59,130,246,.1);padding:.5rem 1.5rem}
+    .ci{max-width:100%;margin:0 auto;display:flex;align-items:center;gap:5px;flex-wrap:nowrap}
+    .sx{display:flex;align-items:center;gap:5px;border:1px solid rgba(59,130,246,.22);border-radius:var(--r-pill);padding:3px 9px;background:var(--surface);flex-shrink:0}
     .sx svg{width:13px;height:13px;stroke:var(--text3);fill:none;flex-shrink:0}
-    .sx input{border:none;outline:none;font-family:"Noto Sans TC",sans-serif;font-size:12px;color:var(--text);background:transparent;width:100%}
-    .fl{font-size:12px;color:var(--text3);white-space:nowrap}
-    .fb{font-family:"Noto Sans TC",sans-serif;font-size:12px;padding:4px 12px;border-radius:var(--r-pill);border:1px solid rgba(59,130,246,.22);background:transparent;color:var(--text2);cursor:pointer;transition:.15s;white-space:nowrap}
+    .sx input{border:none;outline:none;font-family:"Noto Sans TC",sans-serif;font-size:11px;color:var(--text);background:transparent;width:100%}
+    .fl{font-size:10px;color:var(--text3);white-space:nowrap;flex-shrink:0}
+    .fb{font-family:"Noto Sans TC",sans-serif;font-size:11px;padding:3px 8px;border-radius:var(--r-pill);border:1px solid rgba(59,130,246,.22);background:transparent;color:var(--text2);cursor:pointer;transition:.15s;white-space:nowrap}
     .fb:hover{background:var(--surface2)}.fb.active{background:var(--accent);border-color:var(--accent);color:#fff}
     .fb.fE.active{background:var(--esg-e);border-color:var(--esg-e)}
     .fb.fS.active{background:var(--esg-s);border-color:var(--esg-s)}
     .fb.fG.active{background:var(--esg-g);border-color:var(--esg-g)}
     .ml{margin-left:auto}
     /* STATS */
-    .sa{max-width:1300px;margin:1.2rem auto 0;padding:0 2rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem}
+    .sa{max-width:100%;margin:1.2rem auto 0;padding:0 1.5rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.8rem}
     .st{background:var(--surface);border:1px solid var(--border2);border-radius:var(--r-md);padding:.8rem 1rem;transition:.15s}
     .st:hover{box-shadow:0 2px 12px rgba(37,99,235,.08)}
     .sn{font-size:24px;font-weight:500;color:var(--accent)}.sn.pass{color:var(--pass)}.sn.warn{color:var(--warn)}
@@ -87,13 +87,13 @@
     .pp{font-size:12px;font-weight:600;min-width:34px;text-align:right}
     .pp.all{color:var(--accent)}.pp.E{color:var(--esg-e)}.pp.S{color:var(--esg-s)}.pp.G{color:var(--esg-g)}
     /* TABLE */
-    .tw2{max-width:1300px;margin:1.2rem auto 3rem;padding:0 2rem;overflow-x:auto}
-    .dt{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;font-size:12.5px;min-width:900px;table-layout:fixed}
+    .tw2{max-width:100%;margin:1.2rem auto 3rem;padding:0 1.5rem;overflow-x:auto}
+    .dt{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;font-size:12px;min-width:900px;table-layout:fixed}
     .dt thead tr{background:#EFF6FF;border-bottom:1px solid var(--border2)}
     .dt th{padding:9px 11px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.04em;white-space:nowrap}
-    .dt tbody tr{border-bottom:1px solid rgba(59,130,246,.07);transition:.1s;cursor:pointer}
+    .dt tbody tr{border-bottom:1px solid rgba(59,130,246,.07);transition:.1s}
     .dt tbody tr:last-child{border-bottom:none}
-    .dt tbody tr:hover{background:#F0F5FF}
+    .dt tbody tr:hover{background:#F8FAFF}
     .dt td{padding:8px 11px;vertical-align:top;color:var(--text)}
     .dt td.wl{line-height:1.6;max-width:280px}.dt td.w{line-height:1.6;max-width:200px}.dt td.c{text-align:center}
     /* GRID */
@@ -142,7 +142,7 @@
     
     
     .dt td{padding:10px 12px;vertical-align:top;color:var(--text)}
-    .dt tbody tr:hover{background:#F0F5FF;cursor:pointer}
+    .dt tbody tr:hover{background:#F8FAFF}
     .hidden{display:none!important}
     .err{display:none;max-width:1300px;margin:.8rem auto 0;padding:.7rem 2rem;background:#FFF8E1;border:.5px solid rgba(251,192,45,.5);border-radius:var(--r-md);font-size:13px;color:#F57F17}
     .err.show{display:block}
@@ -192,16 +192,20 @@
     <line x1="1040" y1="0" x2="1040" y2="150" stroke="rgba(99,102,241,0.04)" stroke-width="1"/>
   </svg>
   <div class="hin">
-    <div class="htb">
-      <h1>115年 ESG 評鑑管理</h1>
-      <p class="hero-sub">即時同步 Google 試算表，追蹤填答進度與預估得分。</p>
-      <div class="esg-badges">
-        <span class="eb E">🌿 環境面 E</span>
-        <span class="eb S">🤝 社會面 S</span>
-        <span class="eb G">⚖️ 治理面 G</span>
+    <div class="htb" style="max-width:100%">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.8rem">
+        <div>
+          <h1>115年 ESG 評鑑管理</h1>
+          <p class="hero-sub">即時同步 Google 試算表，追蹤填答進度與預估得分。</p>
+        </div>
+        <div class="esg-badges">
+          <span class="eb E">🌿 環境面 E</span>
+          <span class="eb S">🤝 社會面 S</span>
+          <span class="eb G">⚖️ 治理面 G</span>
+        </div>
       </div>
     </div>
-    <div class="hsc" id="hsc"></div>
+    <div class="hsc" id="hsc" style="width:100%"></div>
   </div>
 </section>
 
@@ -210,32 +214,30 @@
 <!-- ══ 搜尋 + 篩選控制列 ══ -->
 <div class="cb">
   <div class="ci">
-    <div class="sx">
-      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="si" type="text" placeholder="搜尋指標、負責人、編號…" oninput="af()">
-    </div>
     <span class="fl">面向：</span>
     <button class="fb active" data-e="all" onclick="se(this,'all')">全部</button>
     <button class="fb fE" data-e="E" onclick="se(this,'E')">🌿 環境</button>
     <button class="fb fS" data-e="S" onclick="se(this,'S')">🤝 社會</button>
     <button class="fb fG" data-e="G" onclick="se(this,'G')">⚖️ 治理</button>
-    <span class="fl ml">面向篩選後：</span>
+    <span class="fl ml">負責人：</span>
+    <button class="fb active" data-ow="all" onclick="sow(this,'all')">全部</button>
+    <button class="fb" data-ow="Ben" onclick="sow(this,'Ben')">Ben</button>
+    <button class="fb" data-ow="Jessie" onclick="sow(this,'Jessie')">Jessie</button>
+    <button class="fb" data-ow="Jordan" onclick="sow(this,'Jordan')">Jordan</button>
+    <button class="fb" data-ow="Leon" onclick="sow(this,'Leon')">Leon</button>
+    <span class="fl" style="margin-left:8px">填答：</span>
     <button class="fb active" id="fa-all"   onclick="sff('all')">全部</button>
     <button class="fb"        id="fa-done"  onclick="sff('done')">已填答</button>
     <button class="fb"        id="fa-empty" onclick="sff('empty')">待填答</button>
+    <div class="sx" style="margin-left:auto;min-width:120px;max-width:180px;flex:0 0 auto">
+      <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="si" type="text" placeholder="搜尋指標、負責人、編號…" oninput="af()">
+    </div>
   </div>
 </div>
 
 <!-- ══ 評鑑指南主表格 ══ -->
 <div class="tw2" id="guide-table"></div>
-
-<!-- ══ 檢視 Modal ══ -->
-<div class="mbg" id="mbg" onclick="cm(event)">
-  <div class="mbox">
-    <div class="mhdr"><div class="mtitle" id="mt2"></div><span class="mclose" onclick="cmd()">✕</span></div>
-    <div class="mbody" id="mb"></div>
-  </div>
-</div>
 
 <!-- ══ 填寫 Modal ══ -->
 <div class="mbg" id="ebg" onclick="ceModal(event)">
@@ -262,6 +264,8 @@
   const GAS_URL  = 'https://script.google.com/macros/s/AKfycbz9-0kOfG0yTGgfCrcIwj908M8sqGUZMtx6GeiBJabG2YIOEOZW_nYaTliRjwep9hOfqg/exec';
   const SHEET_ID = '1ItnIsyaXcd8ZfyD5TVcpbRRo9C9wG3x0dZ5emk4GSOI';
   const GID      = '827224600';
+  const SCORE_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=2066827436&single=true&output=csv';
+
   // 發布到網路的 CSV URL（最穩定，無 CORS 問題）
   const CSV_URLS = [
     'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=827224600&single=true&output=csv',
@@ -356,18 +360,54 @@
   }
 
   /* ── 狀態 ── */
-  let allData=[], eF='all', qF='all', ffF='all', isLoading=false;
+  let allData=[], eF='all', qF='all', ffF='all', owF='all', isLoading=false;
 
   /* ── Hero 統計 ── */
+  let scoreData = null; // 分數計算工作表資料
+
   function renderHSC(data) {
-    const total=data.length, filled=data.filter(r=>r.ans115.trim()).length;
-    const ts=data.reduce((s,r)=>s+(psc(r.score)||0),0);
+    const total  = data.length;
+    const filled = data.filter(r=>r.ans115.trim()).length;
+    // 用 scoreData（若已載入），否則從本地計算
+    const eScore = scoreData ? scoreData.eScore  : '—';
+    const sScore = scoreData ? scoreData.sScore  : '—';
+    const gScore = scoreData ? scoreData.gScore  : '—';
+    const bonus  = scoreData ? scoreData.bonus   : '—';
+    const total2 = scoreData ? scoreData.total   : '—';
     $el('hsc').innerHTML=[
-      {n:total,            l:'評鑑指標', c:'all'},
-      {n:filled,           l:'已填答',   c:'pass'},
-      {n:total-filled,     l:'待填答',   c:'ip'},
-      {n:ts.toFixed(1),    l:'預估得分', c:'sc'},
+      {n:total,   l:'評鑑指標',      c:'all'},
+      {n:filled,  l:'已填答',        c:'pass'},
+      {n:total-filled, l:'待填答',   c:'ip'},
+      {n:eScore,  l:'🌿 環境面得分', c:'sc'},
+      {n:sScore,  l:'🤝 社會面得分', c:'sc'},
+      {n:gScore,  l:'⚖️ 治理面得分', c:'sc'},
+      {n:bonus,   l:'額外加分題',    c:'ip'},
+      {n:total2,  l:'預估總得分',    c:'fail'},
     ].map(s=>`<div class="hcard"><div class="hn ${s.c}">${s.n}</div><div class="hl">${s.l}</div></div>`).join('');
+  }
+
+  async function loadScoreData() {
+    try {
+      const res = await fetch(SCORE_CSV + '&t=' + Date.now(), {cache:'no-store'});
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const rows = parseCSVRows(await res.text());
+      /* 結構（依截圖）：
+         row[5] = 得分題數行：B=環境得分, C=社會得分, D=治理得分
+         row[7] = 分數試算行：B=得分, C=額外加分, D=預估總得分  */
+      const g  = (r, ci) => r && r[ci] ? cleanCell(r[ci]) : '—';
+      const r5 = rows[5];  // index 5 = 第6列（得分題數）
+      const r7 = rows[7];  // index 7 = 第8列（分數試算）
+      scoreData = {
+        eScore : g(r5,1),   // B6
+        sScore : g(r5,2),   // C6
+        gScore : g(r5,3),   // D6
+        bonus  : g(r7,2),   // C8 額外加分
+        total  : g(r7,3),   // D8 預估總得分
+      };
+      console.log('[ESG] scoreData:', scoreData);
+    } catch(e) {
+      console.warn('[ESG] 分數計算載入失敗：', e);
+    }
   }
 
   /* ── 篩選 ── */
@@ -376,6 +416,7 @@
     let r=[...allData];
     if (eF!=='all')  r=r.filter(x=>esgOf(x.dimension)===eF);
     if (qF!=='all')  r=r.filter(x=>(x.qtype||'')===qF);
+    if (owF!=='all')   r=r.filter(x=>x.owner===owF);
     if (ffF==='done')  r=r.filter(x=>x.ans115.trim());
     if (ffF==='empty') r=r.filter(x=>!x.ans115.trim());
     if (q) r=r.filter(x=>x.indicator.toLowerCase().includes(q)||x.owner.toLowerCase().includes(q)||x.no.toLowerCase().includes(q));
@@ -389,6 +430,7 @@
     af();
   }
   function sff(v) { ffF=v; ['all','done','empty'].forEach(k=>$el('fa-'+k)?.classList.toggle('active',k===v)); af(); }
+  function sow(btn,v) { owF=v; document.querySelectorAll('.fb[data-ow]').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); af(); }
 
   /* ══ 評鑑指南主表格 ══
      顯示欄位：面向、編號、評鑑指標、評分指南（可展開）、負責人 */
@@ -399,20 +441,20 @@
     if (!rows.length) { el.innerHTML='<div class="tmsg">此篩選條件下沒有資料</div>'; return; }
     el.innerHTML=`<table class="dt">
       <thead><tr>
-        <th style="width:90px">面向</th>
-        <th style="width:72px">編號</th>
-        <th style="width:30%">評鑑指標</th>
-        <th style="width:45%">評分指南</th>
-        <th style="width:90px">主管機關範例</th>
-        <th style="width:72px">負責人</th>
-        <th style="width:60px;text-align:center">填寫</th>
+        <th style="width:88px">面向</th>
+        <th style="width:64px">編號</th>
+        <th style="width:22%">評鑑指標</th>
+        <th style="width:42%">評分指南</th>
+        <th style="width:88px">主管機關範例</th>
+        <th style="width:68px">負責人</th>
+        <th style="width:96px;text-align:center">填寫</th>
       </tr></thead>
       <tbody>${rows.map((r,i)=>{
         const guide = r.guide ? r.guide.replace(/\n/g,'<br>') : '—';
         const prevAns = r.prevAns || '<span style="color:#CBD5E1">—</span>';
         return `<tr>
           <td>${etag(r.dimension)}<br><span style="font-size:10px;color:var(--text3)">${trunc(r.dimension,6)}</span></td>
-          <td><span style="font-size:11px;font-weight:500;color:var(--text2)">${r.no}</span>${r.prevNo&&r.prevNo!=='－'&&r.prevNo!=='-'?`<br><span style="font-size:9px;color:var(--text3)">前屆${r.prevNo}</span>`:''}</td>
+          <td><span style="font-size:11px;font-weight:500;color:var(--text2)">${r.no}</span></td>
           <td style="font-size:12.5px;line-height:1.8">${r.indicator.replace(/\n/g,'<br>')}</td>
           <td style="font-size:12px;line-height:1.8;vertical-align:top">
             <div class="guide-cell">${guide}</div>
@@ -426,42 +468,16 @@
           <td>${r.owner?`<span class="pb2">${r.owner}</span>`:'—'}</td>
           <td style="text-align:center">
             <button onclick="event.stopPropagation();openEdit(allRows[${i}])"
-              style="background:none;border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:14px;color:var(--accent);transition:.15s"
-              title="填寫115年答題">✏️</button>
+              style="background:none;border:1px solid ${r.ans115.trim()?'rgba(22,163,74,0.35)':'rgba(59,130,246,0.3)'};border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;font-weight:500;color:${r.ans115.trim()?'#15803D':'var(--accent)'};transition:.15s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px"
+              title="${r.ans115.trim()?'已填寫，點擊修改':'點擊填寫115年答題'}">
+              ${r.ans115.trim()?'✅ 已填寫':'✏️ 待填寫'}
+            </button>
           </td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
   }
 
-  /* ── Modal（點列查看完整資料）── */
-  function openModal(r) {
-    const tag=esgOf(r.dimension);
-    $el('mt2').innerHTML=`<span class="etag ${tag}" style="margin-right:8px">${tag}</span>
-      <span style="font-size:12px;color:var(--text3);font-weight:400;margin-right:6px">${r.no}</span>
-      ${qtag(r.qtype)}<span style="margin-left:6px">${r.indicator.replace(/\n/g,'<br>')}</span>`;
-    const s=psc(r.score);
-    $el('mb').innerHTML=`
-      <div class="mgrid">
-        <div class="mrow"><div class="mlabel">面向</div><div class="mval">${r.dimension}</div></div>
-        <div class="mrow"><div class="mlabel">前屆編號</div><div class="mval">${r.prevNo||'—'}</div></div>
-        <div class="mrow"><div class="mlabel">負責人</div><div class="mval">${r.owner?`<span class="pb2">${r.owner}</span>`:'未指定'}</div></div>
-        <div class="mrow"><div class="mlabel">預估得分</div><div class="mval">${s!==null?`<span class="scbadge has">${r.score}</span>`:r.score==='NA'?'不適用':'尚未填入'}</div></div>
-      </div>
-      ${r.criteria?`<div class="mrow"><div class="mlabel">📌 評鑑資訊依據</div><div class="mval">${r.criteria}</div></div>`:''}
-      ${r.guide?`<div class="mrow"><div class="mlabel">📋 評分指南</div><div class="mval hi2">${r.guide.replace(/\n/g,'<br>')}</div></div>`:''}
-      ${r.prevAns?`<div class="mrow"><div class="mlabel">📂 114年答題情形</div><div class="mval hi3">${r.prevAns}</div></div>`:''}
-      <div class="mrow">
-        <div class="mlabel">✍️ 115年填答</div>
-        <div class="mval hi2">${r.ans115||'<span style="color:#94A3B8">尚未填答——請至 Google 試算表填寫</span>'}</div>
-      </div>
-      <div style="text-align:right">
-        <a class="mgo" href="https://docs.google.com/spreadsheets/d/1ItnIsyaXcd8ZfyD5TVcpbRRo9C9wG3x0dZ5emk4GSOI/edit?gid=827224600#gid=827224600" target="_blank" rel="noopener">📝 前往試算表填寫 →</a>
-      </div>`;
-    $el('mbg').classList.add('open');
-  }
-  function cm(e)  { if(e.target===$el('mbg')) $el('mbg').classList.remove('open'); }
-  function cmd()  { $el('mbg').classList.remove('open'); }
 
   /* ── 填寫 Modal ── */
   let editRow = null;
@@ -601,13 +617,10 @@
       setSS('同步失敗，顯示備用資料');
     }
     $el('rb').classList.remove('sp'); isLoading=false;
+    await loadScoreData();
     renderHSC(allData);
     renderGuide(gf());
-    // 點列開 Modal
-    document.querySelectorAll('#guide-table tbody tr').forEach((tr,i)=>{
-      tr.style.cursor='pointer';
-      tr.addEventListener('click',()=>openModal(gf()[i]));
-    });
+
   }
   function refresh() { loadData(); }
 
