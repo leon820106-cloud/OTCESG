@@ -234,7 +234,7 @@
 <div class="tabs-bar">
   <div class="tabs-inner">
     <button class="tabx active" id="tabx-guide" onclick="switchTabX('guide')">📋 評鑑題目</button>
-    <button class="tabx" id="tabx-score" onclick="switchTabX('score')">📊 歷年得分</button>
+    <button class="tabx" id="tabx-score" onclick="switchTabX('score')">📊 歷年評鑑</button>
   </div>
 </div>
 
@@ -272,29 +272,31 @@
 
 </div><!-- end tabx-guide-panel -->
 
-<!-- ══ 歷年得分頁 ══ -->
+<!-- ══ 歷年評鑑頁 ══ -->
 <div id="tabx-score-panel" style="display:none">
   <div class="score-wrap">
     <div class="score-title-row">
       <div class="score-section-title">📊 歷年評鑑得分趨勢</div>
-      <div class="score-note">備註：103～114年為公司治理評鑑（第1～12屆），115年為ESG評鑑第1屆（預估）</div>
+      <div class="score-note" id="score-sync-note">載入中…</div>
     </div>
-    <div id="score-chart-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem 1.5rem 1rem;margin-bottom:1.5rem">
+    <!-- 折線圖 -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);padding:1.5rem 1.5rem 1rem;margin-bottom:1.5rem;position:relative">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:1rem">
-        <span style="width:12px;height:12px;border-radius:50%;background:#C0392B;display:inline-block;flex-shrink:0"></span>
+        <span style="width:12px;height:12px;border-radius:50%;background:#C0392B;flex-shrink:0;display:inline-block"></span>
         <span style="font-size:15px;font-weight:600;color:#C0392B">排名前 5%</span>
       </div>
-      <canvas id="score-chart" style="width:100%"></canvas>
+      <canvas id="score-chart"></canvas>
     </div>
-    <div id="score-table-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
+    <!-- 明細表格 -->
+    <div style="background:#fff;border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden">
       <table style="width:100%;border-collapse:collapse;font-size:13px">
         <thead>
-          <tr style="background:#EFF6FF;border-bottom:1px solid var(--border2)">
-            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);width:80px">年度</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">評鑑類型</th>
-            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:500;color:var(--text3);width:120px">得分</th>
+          <tr style="background:#EFF6FF">
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);width:72px">年度</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);width:100px">評鑑類型</th>
+            <th style="padding:10px 16px;text-align:right;font-size:11px;font-weight:500;color:var(--text3);width:90px">得分</th>
             <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">成果</th>
-            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3)">備註</th>
+            <th style="padding:10px 16px;text-align:left;font-size:11px;font-weight:500;color:var(--text3);width:160px">備註</th>
           </tr>
         </thead>
         <tbody id="score-tbody"></tbody>
@@ -655,164 +657,166 @@
   /* ── 頁籤切換 ── */
   function switchTabX(tab) {
     ['guide','score'].forEach(t => {
-      const panel = document.getElementById('tabx-'+t+'-panel');
-      const btn   = document.getElementById('tabx-'+t);
-      if (panel) panel.style.display = t===tab ? '' : 'none';
-      if (btn)   btn.classList.toggle('active', t===tab);
+      const p = document.getElementById('tabx-'+t+'-panel');
+      const b = document.getElementById('tabx-'+t);
+      if (p) p.style.display = t===tab ? '' : 'none';
+      if (b) b.classList.toggle('active', t===tab);
     });
-    if (tab==='score') {
-      // 若資料還沒載入，先載再渲染
-      if (!HIST_SCORES.length) {
-        loadHistData().then(() => renderScorePage());
-      } else {
-        renderScorePage();
+    if (tab==='score') renderScorePage();
+  }
+
+  /* ── 歷年評鑑資料 ── */
+  const HIST_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRX8k39KS-aI0eySmAkug1kf_UoiN2F1mb0WhTtkDPSEeGIHBEhCmstiMdTb9po59u_xNOXu2ww_TXa/pub?gid=1102103045&single=true&output=csv';
+
+  // 硬編碼歷史數字（確保圖表永遠可用）
+  const BASE_SCORES = [
+    {y:'103', s:90.27,  type:'公司治理評鑑', result:'上櫃公司前5%',  note:'第1屆公司治理評鑑'},
+    {y:'104', s:87.14,  type:'公司治理評鑑', result:'上櫃公司前5%',  note:'第2屆公司治理評鑑'},
+    {y:'105', s:77.60,  type:'公司治理評鑑', result:'上櫃公司6%~20%', note:'第3屆公司治理評鑑'},
+    {y:'106', s:87.05,  type:'公司治理評鑑', result:'上櫃公司前5%',  note:'第4屆公司治理評鑑'},
+    {y:'107', s:83.40,  type:'公司治理評鑑', result:'上櫃公司6%~20%', note:'第5屆公司治理評鑑'},
+    {y:'108', s:83.43,  type:'公司治理評鑑', result:'上櫃公司6%~20%', note:'第6屆公司治理評鑑'},
+    {y:'109', s:90.87,  type:'公司治理評鑑', result:'上櫃公司前5%',  note:'第7屆公司治理評鑑'},
+    {y:'110', s:93.45,  type:'公司治理評鑑', result:'上櫃公司前5%',  note:'第8屆公司治理評鑑'},
+    {y:'111', s:100.56, type:'公司治理評鑑', result:'上櫃公司前5%、市值50億以上上市上櫃公司前5%', note:'第9屆公司治理評鑑'},
+    {y:'112', s:101.25, type:'公司治理評鑑', result:'上櫃公司前5%、市值50億以上上市上櫃公司前5%', note:'第10屆公司治理評鑑'},
+    {y:'113', s:104.08, type:'公司治理評鑑', result:'上櫃公司前5%、市值50億以上上市上櫃公司前5%', note:'第11屆公司治理評鑑'},
+    {y:'114', s:104.87, type:'公司治理評鑑', result:'上櫃公司前5%、市值50億以上上市上櫃公司前5%', note:'第12屆公司治理評鑑'},
+    {y:'115', s:null,   type:'ESG評鑑',     result:'',              note:'ESG評鑑第1屆'},
+  ];
+  let histRows = [...BASE_SCORES]; // 可被 CSV 更新
+
+  async function loadHistData() {
+    try {
+      const res = await fetch(HIST_CSV + '&t=' + Date.now(), {cache:'no-store'});
+      if (!res.ok) throw new Error(res.status);
+      const rows = parseCSVRows(await res.text());
+      // 嘗試用 CSV 更新 result/note
+      for (let i = 1; i < rows.length; i++) {
+        const c = rows[i].map(cleanCell);
+        const yr = c[0].replace(/[^0-9]/g,'');
+        const entry = histRows.find(h => h.y === yr);
+        if (entry) {
+          if (c[3]) entry.result = c[3];
+          if (c[4]) entry.note   = c[4];
+        }
       }
+      document.getElementById('score-sync-note') &&
+        (document.getElementById('score-sync-note').textContent =
+          '備註：103～114年為公司治理評鑑（第1～12屆），115年為ESG評鑑第1屆（預估）');
+    } catch(e) {
+      console.warn('[ESG] 歷年成績 CSV:', e);
+      document.getElementById('score-sync-note') &&
+        (document.getElementById('score-sync-note').textContent =
+          '備註：103～114年為公司治理評鑑（第1～12屆），115年為ESG評鑑第1屆（預估）');
     }
   }
 
-  /* ── 歷年得分資料 ── */
-  let HIST_SCORES = []; // 從 Google Sheets 歷年成績工作表讀取
-  let chartInstance = null;
-  function renderScorePage() {
-    const est = scoreData ? parseFloat(scoreData.total) : null;
+  /* ── 折線圖 ── */
+  let chartInst = null;
 
-    // 表格
+  function renderScorePage() {
+    // 115年預估分從 scoreData
+    const est115 = scoreData ? parseFloat(scoreData.total) : null;
+
+    const labels = histRows.map(d => d.y + '年');
+    const values = histRows.map(d => d.y === '115' ? est115 : d.s);
+    const ptColors = histRows.map(() => '#C0392B');
+
+    console.log('[Chart] values:', values);
+
+    // 畫表格
     const tbody = document.getElementById('score-tbody');
     if (tbody) {
-      tbody.innerHTML = HIST_SCORES.map(d => {
-        const isThis = d.year==='115';
-        const scoreVal = isThis ? est : d.score;
-        const scoreStr = scoreVal != null ? scoreVal.toFixed(2) : '—';
-        const scoreColor = isThis ? 'color:#DC2626;font-weight:600' : 'color:#1D4ED8;font-weight:500';
-        return `<tr class="score-row">
-          <td style="font-weight:500">${d.year}年</td>
-          <td><span class="score-badge ${d.tag}">${d.type||d.tag}</span></td>
-          <td style="text-align:right;font-size:15px;${scoreColor}">${scoreStr}${isThis&&scoreVal?' <span style=\'font-size:10px;color:#DC2626\'>(預估)</span>':''}</td>
-          <td style="color:var(--text3);font-size:12px">${d.result||''}</td>
-          <td style="color:var(--text3);font-size:12px">${d.label||''}</td>
+      tbody.innerHTML = histRows.map(d => {
+        const v = d.y === '115' ? est115 : d.s;
+        const isEsg = d.y === '115';
+        const vs = v != null ? v.toFixed(2) : '—';
+        const vc = isEsg ? '#DC2626' : '#1D4ED8';
+        const tag = isEsg
+          ? '<span class="score-badge esg">ESG評鑑</span>'
+          : '<span class="score-badge cg">公司治理評鑑</span>';
+        return `<tr style="border-bottom:1px solid rgba(59,130,246,.07)">
+          <td style="padding:9px 16px;font-weight:500">${d.y}年</td>
+          <td style="padding:9px 16px">${tag}</td>
+          <td style="padding:9px 16px;text-align:right;font-size:15px;color:${vc};font-weight:600">${vs}${isEsg&&v?' <span style="font-size:10px">(預估)</span>':''}</td>
+          <td style="padding:9px 16px;color:var(--text3);font-size:12px">${d.result}</td>
+          <td style="padding:9px 16px;color:var(--text3);font-size:12px">${d.note}</td>
         </tr>`;
       }).join('');
     }
 
-    // 折線圖
+    // 畫折線圖
     const canvas = document.getElementById('score-chart');
     if (!canvas) return;
-    const chartData = [...HIST_SCORES].reverse(); // 由舊到新
-    const labels   = chartData.map(d => d.year+'年');
-    const vals     = chartData.map(d => d.year==='115' ? est : d.score);
-    const colors   = chartData.map(d => d.year==='115' ? '#DC2626' : '#2563EB');
-    const pointR   = chartData.map(d => d.year==='115' ? 7 : 5);
+    if (chartInst) { chartInst.destroy(); chartInst = null; }
 
-    if (chartInstance) { chartInstance.destroy(); chartInstance = null; }
-    const labelsW = chartData.map(d => d.year+'年');
-    const valsClean = chartData.map(d => d.year==='115' ? (est||null) : d.score);
-
-    // datalabels plugin（顯示每點數值）
-    const datalabelsPlugin = {
-      id: 'datalabels',
-      afterDatasetsDraw(chart) {
-        const {ctx, data, scales:{x,y}} = chart;
-        data.datasets[0].data.forEach((val, i) => {
-          if (val == null) return;
-          const xPos = x.getPixelForIndex(i);
-          const yPos = y.getPixelForValue(val);
-          ctx.save();
-          ctx.font = '600 12px Noto Sans TC, sans-serif';
-          ctx.fillStyle = '#C0392B';
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'bottom';
-          const label2 = chartData[i]?.year==='115' ? val.toFixed(2)+'(預估)' : val.toFixed(2);
-          ctx.fillText(label2, xPos, yPos - 10);
-          ctx.restore();
-        });
-      }
-    };
-
-    chartInstance = new Chart(canvas, {
+    chartInst = new Chart(canvas, {
       type: 'line',
-      plugins: [datalabelsPlugin],
       data: {
-        labels: labelsW,
+        labels,
         datasets: [{
-          label: '評鑑得分',
-          data: valsClean,
+          data: values,
           borderColor: '#C0392B',
           borderWidth: 2.5,
-          pointBackgroundColor: '#C0392B',
-          pointBorderColor: '#C0392B',
-          pointRadius: 7,
-          pointHoverRadius: 9,
+          pointBackgroundColor: ptColors,
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          pointRadius: 6,
+          pointHoverRadius: 8,
           fill: false,
           tension: 0,
+          spanGaps: true,
         }]
       },
       options: {
         responsive: true,
         maintainAspectRatio: true,
-        aspectRatio: 2.8,
-        layout: { padding: { top: 28, right: 20 } },
+        aspectRatio: 3.2,
+        layout: { padding: { top: 30, right: 20 } },
         plugins: {
           legend: { display: false },
           tooltip: {
             callbacks: {
               label: ctx => {
-                const d = chartData[ctx.dataIndex];
                 const v = ctx.parsed.y;
-                return v ? ` ${v.toFixed(2)} 分${d&&d.year==='115'?' (預估)':''}` : ' 同步中';
-              },
-              title: ctx => chartData[ctx[0].dataIndex]?.label || ''
+                return v ? ` ${v.toFixed(2)} 分` : ' —';
+              }
             }
           }
         },
         scales: {
           x: {
-            grid: { color: 'rgba(0,0,0,0.06)' },
-            ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555' }
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            ticks: { font: { size: 12 }, color: '#555' }
           },
           y: {
-            min: 80,
-            max: 120,
-            title: { display: true, text: '成績', font: { family: 'Noto Sans TC', size: 12 }, color: '#555' },
-            grid: { color: 'rgba(0,0,0,0.06)' },
-            ticks: { font: { family: 'Noto Sans TC', size: 12 }, color: '#555', stepSize: 10 }
+            min: 70, max: 120,
+            grid: { color: 'rgba(0,0,0,0.05)' },
+            title: { display: true, text: '成績', font: { size: 12 }, color: '#555' },
+            ticks: { stepSize: 10, font: { size: 12 }, color: '#555' }
           }
         }
-      }
+      },
+      plugins: [{
+        id: 'ptLabels',
+        afterDatasetsDraw(chart) {
+          const {ctx, scales: {x, y}} = chart;
+          values.forEach((v, i) => {
+            if (v == null) return;
+            const px = x.getPixelForIndex(i);
+            const py = y.getPixelForValue(v);
+            ctx.save();
+            ctx.font = 'bold 11.5px "Noto Sans TC",sans-serif';
+            ctx.fillStyle = '#C0392B';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(v.toFixed(2), px, py - 10);
+            ctx.restore();
+          });
+        }
+      }]
     });
-  }
-
-  async function loadHistData() {
-    // 歷史分數硬編碼（103-114年），115年從試算表讀取
-    HIST_SCORES = [
-      {year:'103', score:90.27,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第1屆公司治理評鑑'},
-      {year:'104', score:87.14,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第2屆公司治理評鑑'},
-      {year:'105', score:77.60,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司6%~20%',                                    label:'第3屆公司治理評鑑'},
-      {year:'106', score:87.05,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第4屆公司治理評鑑'},
-      {year:'107', score:83.40,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司6%~20%',                                    label:'第5屆公司治理評鑑'},
-      {year:'108', score:83.43,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司6%~20%',                                    label:'第6屆公司治理評鑑'},
-      {year:'109', score:90.87,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第7屆公司治理評鑑'},
-      {year:'110', score:93.45,  tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%',                                      label:'第8屆公司治理評鑑'},
-      {year:'111', score:100.56, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第9屆公司治理評鑑'},
-      {year:'112', score:101.25, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第10屆公司治理評鑑'},
-      {year:'113', score:104.08, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第11屆公司治理評鑑'},
-      {year:'114', score:104.87, tag:'cg',  type:'公司治理評鑑', result:'上櫃公司前5%、市值50億元以上至100億元之上市上櫃公司前5%', label:'第12屆公司治理評鑑'},
-      {year:'115', score:null,   tag:'esg', type:'ESG評鑑',      result:'',                                                label:'ESG評鑑第1屆'},
-    ];
-    // 嘗試從試算表讀取115年的成果欄位
-    try {
-      const res = await fetch(HIST_CSV + '&t=' + Date.now(), {cache:'no-store'});
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const rows = parseCSVRows(await res.text());
-      for (let i = 1; i < rows.length; i++) {
-        const c = rows[i].map(cleanCell);
-        const yr = c[0].replace(/年/g,'').trim();
-        const entry = HIST_SCORES.find(h => h.year === yr);
-        if (entry && c[3]) entry.result = c[3]; // 更新成果欄
-      }
-      console.log('[ESG] histData 成果欄更新完成');
-    } catch(e) {
-      console.warn('[ESG] 歷年成績 CSV 載入失敗，使用預設值：', e);
-    }
   }
 
   async function loadData() {
