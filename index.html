@@ -234,6 +234,7 @@
   <div class="tabs-inner">
     <button class="tabx active" id="tabx-guide" onclick="switchTabX('guide')">📋 評鑑題目</button>
     <button class="tabx" id="tabx-fill" onclick="switchTabX('fill')">✍️ 填答專區</button>
+    <button class="tabx" id="tabx-eval" onclick="switchTabX('eval')">📈 得分評估</button>
     <button class="tabx" id="tabx-score" onclick="switchTabX('score')">📊 歷年評鑑</button>
   </div>
 </div>
@@ -290,6 +291,32 @@
     </div>
   </div>
   <div class="tw2" id="fill-table"></div>
+</div>
+
+<!-- ══ 得分評估頁 ══ -->
+<div id="tabx-eval-panel" style="display:none">
+  <div class="cb">
+    <div class="ci">
+      <span class="fl">得分狀態：</span>
+      <button class="fb active" id="ev-all"   onclick="sev('all')">全部</button>
+      <button class="fb"        id="ev-has"   onclick="sev('has')">✅ 可得分</button>
+      <button class="fb"        id="ev-zero"  onclick="sev('zero')">❌ 未得分</button>
+      <button class="fb"        id="ev-na"    onclick="sev('na')">➖ 不適用</button>
+      <span class="fsep"></span>
+      <span class="fl">負責人：</span>
+      <button class="fb active" data-ev-ow="all" onclick="sevow(this,'all')">全部</button>
+      <button class="fb" data-ev-ow="Ben"    onclick="sevow(this,'Ben')">Ben</button>
+      <button class="fb" data-ev-ow="Jessie" onclick="sevow(this,'Jessie')">Jessie</button>
+      <button class="fb" data-ev-ow="Jordan" onclick="sevow(this,'Jordan')">Jordan</button>
+      <button class="fb" data-ev-ow="Leon"   onclick="sevow(this,'Leon')">Leon</button>
+      <span class="fsep"></span>
+      <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
+        <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="siev" type="text" placeholder="搜尋指標、負責人、編號…" oninput="renderEvalTable()">
+      </div>
+    </div>
+  </div>
+  <div class="tw2" id="eval-table"></div>
 </div>
 
 <!-- ══ 歷年評鑑頁 ══ -->
@@ -392,6 +419,7 @@
       const indicator = c[3] || '';
       if (!indicator) continue;
       const pa = c[8]  || '', an = c[10] || '', sc = c[11] || '', qt = c[4] || '';
+      const es = c[11] || '';
       rows.push({
         dimension : c[0] || '',
         no        : c[1] || '',
@@ -405,6 +433,7 @@
         owner     : c[9]  || '',
         ans115    : (an.startsWith('=') || an === '#N/A') ? '' : an,
         score     : (sc.startsWith('=') || sc === '#N/A') ? '' : sc,
+        estScore  : (es.startsWith('=') || es === '#N/A' || es === '#VALUE!') ? '' : es,
       });
     }
     return rows;
@@ -677,7 +706,7 @@
   /* ── 載入 ── */
   /* ── 頁籤切換 ── */
   function switchTabX(tab) {
-    ['guide','fill','score'].forEach(t => {
+    ['guide','fill','eval','score'].forEach(t => {
       const p = document.getElementById('tabx-'+t+'-panel');
       const b = document.getElementById('tabx-'+t);
       if (p) p.style.display = t===tab ? '' : 'none';
@@ -685,6 +714,7 @@
     });
     if (tab==='score') renderScorePage();
     if (tab==='fill')  renderFillTable();
+    if (tab==='eval')  renderEvalTable();
   }
 
   /* ── 歷年評鑑資料 ── */
@@ -788,42 +818,121 @@
     if (!el) return;
     if (!rows.length) { el.innerHTML='<div class="tmsg">此篩選條件下沒有資料</div>'; return; }
 
-    el.innerHTML = `<table class="dt">
+    const showGuide = fillFf !== 'all';
+
+    el.innerHTML = `<table class="dt" style="table-layout:fixed">
+      <colgroup>
+        <col style="width:48px">
+        <col style="width:60px">
+        <col style="${showGuide ? 'width:28%' : 'width:55%'}">
+        ${showGuide ? '<col style="width:38%">' : ''}
+        <col style="width:72px">
+        <col style="width:110px">
+      </colgroup>
       <thead><tr>
-        <th style="width:88px">面向</th>
-        <th style="width:64px">編號</th>
-        <th style="width:22%">評鑑指標</th>
-        <th style="width:35%">評分指南</th>
-        <th style="width:64px">負責人</th>
-        <th style="width:120px;text-align:center">填寫</th>
+        <th style="text-align:center">面向</th>
+        <th>編號</th>
+        <th>評鑑指標</th>
+        ${showGuide ? '<th>評分指南</th>' : ''}
+        <th>負責人</th>
+        <th style="text-align:center">填寫</th>
       </tr></thead>
       <tbody>${rows.map((r,i)=>{
         const guide = r.guide ? r.guide.replace(/\n/g,'<br>') : '—';
         const f = r.ans115.trim();
-        // 已填答：直接顯示內容；未填答：顯示按鈕
         const fillCell = f
-          ? `<div style="font-size:12px;line-height:1.7;color:var(--text2);border-left:3px solid #16A34A;padding-left:8px">${f}</div>
+          ? `<div style="font-size:11.5px;line-height:1.7;color:var(--text2);border-left:3px solid #16A34A;padding-left:8px;margin-bottom:6px">${f}</div>
              <button onclick="event.stopPropagation();openEdit(fillRows[${i}])"
-               style="margin-top:6px;background:none;border:1px solid rgba(22,163,74,0.4);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;color:#15803D;white-space:nowrap">
-               ✏️ 更正
-             </button>`
+               style="background:none;border:1px solid rgba(22,163,74,0.4);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;color:#15803D;white-space:nowrap">✏️ 更正</button>`
           : `<button onclick="event.stopPropagation();openEdit(fillRows[${i}])"
-               style="background:none;border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;font-weight:500;color:var(--accent);white-space:nowrap">
-               ✏️ 待填寫
-             </button>`;
-        return `<tr>
-          <td>${etag(r.dimension)}<br><span style="font-size:10px;color:var(--text3)">${r.dimension}</span></td>
-          <td><span style="font-size:11px;font-weight:500;color:var(--text2)">${r.no}</span></td>
-          <td style="font-size:12.5px;line-height:1.8">${r.indicator.replace(/\n/g,'<br>')}</td>
-          <td style="font-size:12px;line-height:1.8">${guide}</td>
-          <td>${r.owner?`<span class="pb2">${r.owner}</span>`:'—'}</td>
-          <td style="vertical-align:top;padding-top:10px">${fillCell}</td>
+               style="background:none;border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:5px 14px;cursor:pointer;font-size:12px;font-weight:500;color:var(--accent);white-space:nowrap;display:inline-flex;align-items:center;gap:4px">✏️ 待填寫</button>`;
+        const esgTag = esgOf(r.dimension);
+        return `<tr style="vertical-align:top">
+          <td style="text-align:center;padding-top:12px"><span class="etag ${esgTag}" style="font-size:11px;padding:3px 7px">${esgTag}</span></td>
+          <td style="padding-top:12px;font-size:11.5px;font-weight:600;color:var(--text2)">${r.no}</td>
+          <td style="font-size:12.5px;line-height:1.75;padding-top:10px">${r.indicator.replace(/\n/g,'<br>')}</td>
+          ${showGuide ? `<td style="font-size:12px;line-height:1.8;padding-top:10px;color:var(--text2)">${guide}</td>` : ''}
+          <td style="padding-top:11px">${r.owner?`<span class="pb2">${r.owner}</span>`:'—'}</td>
+          <td style="padding-top:10px;text-align:center">${fillCell}</td>
         </tr>`;
       }).join('')}</tbody>
     </table>`;
 
-    // 儲存 fillRows 給 openEdit 用
     window.fillRows = rows;
+  }
+
+  /* ── 得分評估 ── */
+  let evF='all', evOwF='all';
+
+  function classifyScore(s) {
+    if (!s || s.trim()==='') return 'empty';
+    const v = s.trim().toUpperCase();
+    if (v==='NA' || v==='N/A' || v==='不適用') return 'na';
+    const n = parseFloat(s.replace(/[^0-9.\-]/g,''));
+    if (isNaN(n)) return 'empty';
+    return n > 0 ? 'has' : 'zero';
+  }
+
+  function geval() {
+    const q=($el('siev')?.value||'').toLowerCase();
+    let r=[...allData];
+    if (evOwF!=='all') r=r.filter(x=>x.owner===evOwF);
+    if (evF!=='all')   r=r.filter(x=>classifyScore(x.estScore)===evF);
+    if (q) r=r.filter(x=>x.indicator.toLowerCase().includes(q)||x.owner.toLowerCase().includes(q)||x.no.toLowerCase().includes(q));
+    return r;
+  }
+  function sev(v) {
+    evF=v;
+    ['all','has','zero','na'].forEach(k=>$el('ev-'+k)?.classList.toggle('active',k===v));
+    renderEvalTable();
+  }
+  function sevow(btn,v) {
+    evOwF=v;
+    document.querySelectorAll('.fb[data-ev-ow]').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    renderEvalTable();
+  }
+
+  function renderEvalTable() {
+    const rows=geval(), el=$el('eval-table');
+    if (!el) return;
+    if (!rows.length) { el.innerHTML='<div class="tmsg">此篩選條件下沒有資料</div>'; return; }
+
+    el.innerHTML=`<table class="dt" style="table-layout:fixed">
+      <colgroup>
+        <col style="width:48px"><col style="width:60px">
+        <col style="width:26%"><col style="width:64px">
+        <col style="width:28%"><col style="width:110px">
+      </colgroup>
+      <thead><tr>
+        <th style="text-align:center">面向</th>
+        <th>編號</th>
+        <th>評鑑指標</th>
+        <th>負責人</th>
+        <th>115年填答</th>
+        <th style="text-align:center">可得分數</th>
+      </tr></thead>
+      <tbody>${rows.map(r=>{
+        const cls=classifyScore(r.estScore);
+        const scoreDisplay = cls==='has'
+          ? `<span style="font-size:15px;font-weight:600;color:#16A34A">${r.estScore}</span><br><span style="font-size:10px;color:#16A34A">✅ 可得分</span>`
+          : cls==='zero'
+          ? `<span style="font-size:13px;font-weight:500;color:#DC2626">0</span><br><span style="font-size:10px;color:#DC2626">❌ 未得分</span>`
+          : cls==='na'
+          ? `<span style="font-size:13px;color:#94A3B8">N/A</span><br><span style="font-size:10px;color:#94A3B8">➖ 不適用</span>`
+          : `<span style="font-size:12px;color:#CBD5E1">—</span>`;
+        const ans=r.ans115.trim();
+        const esgTag=esgOf(r.dimension);
+        return `<tr style="vertical-align:top">
+          <td style="text-align:center;padding-top:12px"><span class="etag ${esgTag}">${esgTag}</span></td>
+          <td style="padding-top:12px;font-size:11.5px;font-weight:600;color:var(--text2)">${r.no}</td>
+          <td style="font-size:12.5px;line-height:1.75;padding-top:10px">${r.indicator.replace(/\n/g,'<br>')}</td>
+          <td style="padding-top:11px">${r.owner?`<span class="pb2">${r.owner}</span>`:'—'}</td>
+          <td style="font-size:12px;line-height:1.7;padding-top:10px;color:var(--text2)">${ans||'<span style="color:#CBD5E1">尚未填答</span>'}</td>
+          <td style="text-align:center;padding-top:10px">${scoreDisplay}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
   }
 
   /* ── SVG 折線圖 ── */
