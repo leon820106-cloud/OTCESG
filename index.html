@@ -159,7 +159,7 @@
     .guide-cell{line-height:1.8}
     
     
-    .dt td{padding:10px 12px;vertical-align:top;color:var(--text)}
+    .dt td{padding:9px 10px;vertical-align:top;color:var(--text)}
     .dt tbody tr:hover{background:#F8FAFF}
     .hidden{display:none!important}
     .err{display:none;max-width:1300px;margin:.8rem auto 0;padding:.7rem 2rem;background:#FFF8E1;border:.5px solid rgba(251,192,45,.5);border-radius:var(--r-md);font-size:13px;color:#F57F17}
@@ -258,7 +258,7 @@
     <span class="fsep"></span>
     <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
       <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      <input id="si" type="text" placeholder="搜尋指標、負責人、編號…" oninput="af()">
+      <input id="si" type="text" placeholder="搜尋指標內容…" oninput="af()">
     </div>
   </div>
 </div>
@@ -286,7 +286,7 @@
       <span class="fsep"></span>
       <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
         <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="sif" type="text" placeholder="搜尋指標、負責人、編號…" oninput="afill()">
+        <input id="sif" type="text" placeholder="搜尋指標內容…" oninput="afill()">
       </div>
     </div>
   </div>
@@ -303,16 +303,9 @@
       <button class="fb"        id="ev-zero"  onclick="sev('zero')">❌ 未得分</button>
       <button class="fb"        id="ev-na"    onclick="sev('na')">➖ 不適用</button>
       <span class="fsep"></span>
-      <span class="fl">負責人：</span>
-      <button class="fb active" data-ev-ow="all" onclick="sevow(this,'all')">全部</button>
-      <button class="fb" data-ev-ow="Ben"    onclick="sevow(this,'Ben')">Ben</button>
-      <button class="fb" data-ev-ow="Jessie" onclick="sevow(this,'Jessie')">Jessie</button>
-      <button class="fb" data-ev-ow="Jordan" onclick="sevow(this,'Jordan')">Jordan</button>
-      <button class="fb" data-ev-ow="Leon"   onclick="sevow(this,'Leon')">Leon</button>
-      <span class="fsep"></span>
       <div class="sx" style="margin-left:auto;min-width:140px;max-width:200px;flex:0 0 auto">
         <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <input id="siev" type="text" placeholder="搜尋指標、負責人、編號…" oninput="renderEvalTable()">
+        <input id="siev" type="text" placeholder="搜尋指標內容…" oninput="renderEvalTable()">
       </div>
     </div>
   </div>
@@ -419,7 +412,7 @@
       const indicator = c[3] || '';
       if (!indicator) continue;
       const pa = c[8]  || '', an = c[10] || '', sc = c[11] || '', qt = c[4] || '';
-      const es = c[11] || '';
+      const es = c[12] || '';
       rows.push({
         dimension : c[0] || '',
         no        : c[1] || '',
@@ -558,10 +551,10 @@
     if (!rows.length) { el.innerHTML='<div class="tmsg">此篩選條件下沒有資料</div>'; return; }
     el.innerHTML=`<table class="dt">
       <thead><tr>
-        <th style="width:88px">面向</th>
-        <th style="width:64px">編號</th>
+        <th style="width:44px;text-align:center">面向</th>
+        <th style="width:52px">編號</th>
         <th style="width:22%">評鑑指標</th>
-        <th style="width:42%">評分指南</th>
+        <th style="width:44%">評分指南</th>
         <th style="width:88px">主管機關範例</th>
         <th style="width:68px">負責人</th>
       </tr></thead>
@@ -569,7 +562,7 @@
         const guide = r.guide ? r.guide.replace(/\n/g,'<br>') : '—';
         const prevAns = r.prevAns || '<span style="color:#CBD5E1">—</span>';
         return `<tr>
-          <td>${etag(r.dimension)}<br><span style="font-size:10px;color:var(--text3)">${trunc(r.dimension,6)}</span></td>
+          <td style="text-align:center;padding:10px 4px">${etag(r.dimension)}</td>
           <td><span style="font-size:11px;font-weight:500;color:var(--text2)">${r.no}</span></td>
           <td style="font-size:12.5px;line-height:1.8">${r.indicator.replace(/\n/g,'<br>')}</td>
           <td style="font-size:12px;line-height:1.8;vertical-align:top">
@@ -822,12 +815,12 @@
 
     el.innerHTML = `<table class="dt" style="table-layout:fixed">
       <colgroup>
-        <col style="width:48px">
-        <col style="width:60px">
-        <col style="${showGuide ? 'width:28%' : 'width:55%'}">
-        ${showGuide ? '<col style="width:38%">' : ''}
-        <col style="width:72px">
-        <col style="width:110px">
+        <col style="width:44px">
+        <col style="width:52px">
+        <col style="${showGuide ? 'width:28%' : 'width:58%'}">
+        ${showGuide ? '<col style="width:36%">' : ''}
+        <col style="width:76px">
+        <col style="width:120px">
       </colgroup>
       <thead><tr>
         <th style="text-align:center">面向</th>
@@ -953,7 +946,7 @@
     function isTop5(yr)  { return /前5%/.test(getInfo(yr).result||''); }
     function is6to20(yr) { return /6%~20%/.test(getInfo(yr).result||''); }
 
-    const W=900, H=340, PL=52, PR=20, PT=52, PB=40;
+    const W=900, H=360, PL=52, PR=20, PT=52, PB=52;
     const CW=W-PL-PR, CH=H-PT-PB;
     const minV=70, maxV=120;
     function px(i)   { return PL + i*(CW/(PTS.length-1)); }
@@ -990,11 +983,11 @@
 
       // 分數標籤（上方）
       const labelColor = is115 ? '#B45309' : top5 ? '#C0392B' : '#6B7280';
-      scoreLabels += `<text x="${cx.toFixed(1)}" y="${(cy-12).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="bold" fill="${labelColor}">${d.s.toFixed(2)}</text>`;
+      if (!is115) scoreLabels += `<text x="${cx.toFixed(1)}" y="${(cy-12).toFixed(1)}" text-anchor="middle" font-size="10.5" font-weight="bold" fill="${labelColor}">${d.s.toFixed(2)}</text>`;
 
       // 排名標籤（分數上方再一行）
       let rankText = '';
-      if (is115)     rankText = est115 ? `預估 ${est115.toFixed(2)}` : '預估';
+      if (is115)     rankText = ''; // 115年不顯示預估文字
       else if (top5) rankText = '前5%';
       else if (r6)   rankText = '6~20%';
       if (rankText) {
@@ -1018,7 +1011,7 @@
       <circle cx="70" cy="16" r="6" fill="#C0392B" stroke="#fff" stroke-width="1.5"/>
       <text x="82" y="20" font-size="11" fill="#6B7280">排名前5%</text>
       <circle cx="148" cy="16" r="6" fill="#6B7280" stroke="#fff" stroke-width="1.5"/>
-      <text x="160" y="20" font-size="11" fill="#6B7280">6~20%</text>
+      <text x="160" y="20" font-size="11" fill="#6B7280">排名6~20%</text>
       <circle cx="230" cy="16" r="6" fill="#F59E0B" stroke="#fff" stroke-width="1.5"/>
       <text x="242" y="20" font-size="11" fill="#6B7280">115年預估</text>`;
 
