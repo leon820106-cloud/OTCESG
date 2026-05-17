@@ -681,11 +681,16 @@
       editRow.ans115 = text;
       const found = allData.find(r => r.no === editRow.no);
       if (found) found.ans115 = text;
+      // 即時更新所有頁面畫面
+      renderHSC(allData);
+      renderGuide(gf());
+      renderFillTable();
+      renderEvalTable();
       btn.textContent='✅ 已儲存';
       setTimeout(() => {
         btn.disabled=false;
-        btn.textContent='💾 儲存至試算表';
-      }, 3000);
+        btn.textContent= editRow.ans115.trim() ? '💾 更正並儲存' : '💾 儲存至試算表';
+      }, 2000);
     } catch(err) {
       hint.style.display='block';
       hint.style.background='#FEE2E2';
